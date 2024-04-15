@@ -1,0 +1,285 @@
+/* Resetting default margin and padding */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Set the background color of the entire page */
+body {
+    background-color: rgb(24, 26, 27);
+    color: #fff; /* Set default text color */
+    font-family: Arial, sans-serif; /* Set default font family */
+}
+
+/* Container to hold both left and right side sections */
+.profile-container {
+    display: flex; /* Use flexbox */
+}
+
+/* Styling for the left side section */
+.left-section {
+    flex: 0 0 50%; /* Take up half of the available space */
+    padding: 100px; /* Add padding for spacing */
+    position: fixed; /* Fix the left side */
+    top: 0; /* Align to the top */
+    left: 0; /* Align to the left */
+    height: 100vh; /* Full height of the viewport */
+    overflow-y: auto; /* Add vertical scrollbar if content exceeds viewport */
+}
+
+/* Styling for the right side section */
+.right-section {
+    flex: 1; /* Take up the remaining space */
+    padding: 100px; /* Add padding for spacing */
+    margin-left: 50%; /* Push right side content beside the fixed left side */
+    transition: margin-left 0.5s ease; /* Add transition effect */
+}
+
+/* Add space between project divs */
+.projects > .project-item {
+    margin-bottom: 50px; /* Add margin-bottom for spacing */
+}
+
+/* Add transition effect to project div h2, p, and img elements */
+.projects > .project-item h2,
+.projects > .project-item p,
+.projects > .project-item img {
+    transition: transform 0.5s ease-out; /* Add transition effect */
+    transform: scale(1); /* Set initial scale */
+}
+
+/* Apply hover effect to project div h2, p, and img elements */
+.projects > .project-item:hover h2,
+.projects > .project-item:hover p,
+.projects > .project-item:hover img {
+    transform: scale(1.1); /* Zoom in the elements */
+}
+
+/* Styling for links */
+a {
+    color: #fff; /* Set link color */
+    text-decoration: none; /* Remove underline */
+    border-bottom: 1px solid transparent; /* Add transparent border bottom */
+    transition: border-bottom-color 0.3s ease, transform 0.3s ease; /* Add transition effect */
+    display: inline-block; /* Make the links inline-block to control their positioning */
+    vertical-align: middle; /* Align the links vertically in the middle */
+    margin-right: 25px; /* Add space between each link */
+}
+
+a:hover {
+    border-bottom-color: white; /* Change border bottom color on hover */
+    transform: translateX(5px); /* Move the link 5px to the right on hover */
+}
+
+/* Styling for headings */
+h1, h2, h3, h4, h5, h6 {
+    color: #fff; /* Set heading color */
+    margin-bottom: 20px; /* Add margin to the bottom of headings */
+    margin-top: 5px;
+}
+
+/* Blockquote main style */
+.blockquote {
+    position: relative;
+    font-family: 'Barlow Condensed', sans-serif;
+    max-width: 500px;
+    margin: 30px auto;
+    align-self: center;
+}
+
+/* Blockquote header */
+.blockquote h3 {
+    font-family: 'Abril Fatface', cursive;
+    position: relative; /* for pseudos */
+    font-size: 1.4rem;
+    font-weight: normal;
+    line-height: 2;
+    border: 1px solid #fff;
+    border-radius: 20px;
+    padding: 10px;
+}
+
+/* Styling for paragraphs */
+p {
+    color: rgba(255, 255, 255, 0.8); /* Set paragraph color with slight opacity */
+    font-size: 16px; /* Set default font size for paragraphs */
+    line-height: 1.6; /* Set line height for better readability */
+    margin-bottom: 40px;
+}
+
+/* Styling for profile links */
+#project-link,
+#work-link {
+    margin-top: 40px;
+}
+
+#linkedin-link,
+#email-link {
+    margin-top: 70%;
+}
+
+/* Styling for the logo */
+#profile-logo {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    margin-right: 30px;
+    float: left; /* Float the logo to the left */
+    margin-top: 60%;
+}
+
+/* Styling for footer */
+footer {
+    overflow: auto; /* Clear floats */
+}
+
+ul {
+    list-style: none; /* Remove default bullet points */
+}
+
+/* Styling for horizontal rules */
+.right-section hr {
+    height: 1px;
+    background-color: rgba(255, 255, 255, 0.7); /* Adjust RGBA values for semi-transparent white */
+    border: none;
+    position: relative;
+    margin: 20px 0;
+    animation: float 2s linear infinite alternate;
+}
+
+
+
+@keyframes float {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(4%);
+    }
+}
+
+/* Media queries for responsiveness */
+
+/* Consolidate duplicate media queries for better maintainability */
+
+/* For screen sizes up to 768px (small devices like smartphones) */
+@media screen and (max-width: 768px) {
+    .profile-container {
+        flex-direction: column; /* Stack sections vertically */
+    }
+
+    .left-section,
+    .right-section {
+        width: 100%; /* Make both sides take up full width */
+        padding: 50px; /* Adjust padding for smaller screens */
+        position: static; /* Remove fixed positioning */
+        margin: 0; /* Reset margin */
+    }
+
+    #profile-logo {
+        display: none; /* Hide the logo on smaller screens if necessary */
+    }
+
+    .projects > .project-item {
+        margin-bottom: 30px; /* Reduce margin between projects for smaller screens */
+    }
+}
+
+/* Add styles for dropdown menus */
+.dropdown-container {
+    margin-bottom: 40px; /* Increase margin between dropdown containers */
+}
+
+/* Hide the checkbox */
+.toggle-checkbox {
+    display: none;
+}
+
+.dropdown-header {
+    cursor: pointer;
+    margin-bottom: 30px; /* Increase margin between header and projects */
+    border: 2px solid rgba(0, 0, 0, 0.2); /* Add border around header with transparency */
+    border-radius: 10px; /* Add border radius */
+    padding: 20px; /* Add padding to header */
+    display: inline-block; /* Ensure full width */
+    width: fit-content; /* Set width based on content */
+    text-align: center; /* Center-align text */
+}
+
+.dropdown-header > h1, 
+.dropdown-header > h6 {
+    transition: transform 0.5s ease-out; /* Add transition effect */
+    margin: 0; /* Remove default margin */
+}
+
+.dropdown-content {
+    display: none;
+    margin-top: 20px; /* Increase margin between header and content */
+}
+
+/* Display content when the associated mark is specific */
+.toggle-checkbox:checked + .dropdown-header + .dropdown-content {
+    display: block;
+}
+
+/* Apply hover effect to dropdown headers */
+.dropdown-header:hover > h1,
+.dropdown-header:hover > h6 {
+    transform: scale(1.1); /* Zoom in effect */
+}
+
+/* Apply hover effect to projects inside the dropdown content */
+.dropdown-content .project-item {
+    transition: transform 0.5s ease-out; /* Add transition effect */
+    margin-bottom: 20px; /* Increase margin between projects */
+}
+
+.dropdown-content .project-item:hover {
+    transform: scale(1.1); /* Zoom in effect */
+}
+
+
+/* To hide a specific project with id  */
+/* #calc {
+    display: none;
+} */
+
+
+
+/* For screen sizes between 769px and 1200px (medium devices like tablets) */
+@media screen and (min-width: 769px) and (max-width: 1200px) {
+    .left-section,
+    .right-section {
+        width: 50%; /* Make both sides take up half of the width */
+    }
+}
+
+/* For screen sizes above 1200px (large devices like desktops) */
+@media screen and (min-width: 1201px) {
+    .profile-container {
+        max-width: 1200px; /* Limit container width for large screens */
+        margin: 0 auto; /* Center container horizontally */
+    }
+}
+
+/* Additional responsive settings based on your provided CSS code */
+@media only screen and (max-width: 879px) and (min-width: 1020px) {
+    /* Add your additional responsive settings here */
+}
+
+@media only screen and (min-width: 781px) and (max-width: 1020px) {
+    /* Add your additional responsive settings here */
+}
+
+@media only screen and (max-width: 780px) {
+    /* Add your additional responsive settings here */
+}
+
+@media only screen and (max-width: 768px) {
+    /* Add your additional responsive settings here */
+}
+
+@media only screen and (max-width: 500px) {
+    /* Add your additional responsive settings here */
+}
