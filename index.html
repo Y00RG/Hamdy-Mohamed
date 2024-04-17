@@ -1,20 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<?php require_once("functions.php"); ?>
-
 <head>
     <meta charset="UTF-8">
     <meta name="description" content="Back-End Developer">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hamdy Mohamed</title>
     <link rel="stylesheet" href="css/main.css">
-    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-
     <link rel="icon" href="media/logo.jpg" type="image/png">
-
-
 </head>
 
 <body>
@@ -27,9 +20,7 @@
             <h2 id="profile-title"><strong>Back-End Developer</strong></h2>
 
             <div class="profile-description">
-                <h3>
-                  Building the <b>backend</b> one step at a time.
-                 </h3>
+                <h3>Building the <b>backend</b> one step at a time.</h3>
             </div>
 
             <ul class="nav-links">
@@ -41,44 +32,27 @@
                 <img id="profile-logo" src="media/logo.jpg" alt="Logo Profile!">
                 <a id="linkedin-link" target="_blank" title="linkedin" href="https://www.linkedin.com/in/hamdy-mohamed-0b738a177/">
                     <i class="fab fa-linkedin"></i> Linkedin
-                    <span class="icon">
-                        <!-- LinkedIn icon SVG -->
-                    </span>
                 </a>
                 <a id="email-link" title="Email" href="mailto:hamdy.mohammed.01212@gmail.com">
                     <i class="far fa-envelope"></i> Contact Me
-                    <span class="icon">
-                        <!-- Email icon SVG -->
-                    </span>
                 </a>
                 <a id="resume-link" title="Resume" href="media/Hamdy.Resume.2023.pdf" download>
                     <i class="fas fa-file-download"></i> Download CV
-                    <span class="icon">
-                        <!-- Download icon SVG, or you can use FontAwesome icons -->
-                    </span>
                 </a>
             </footer>
-            
-            
 
         </div>
 
         <div class= "right-section">
-
-
 
             <div class="projects" id="projects">
                 <div class="dropdown-container">
                     <input type="checkbox" id="simple-projects-toggle" class="toggle-checkbox">
                     <label class="dropdown-header simple-projects" for="simple-projects-toggle">
                         <h1>Simple Projects</h1>
-                        <h6 class='project-count'>
-                            <?php echo countDirectories("My-Projects/Simple Projects") ?>
-                           7 Projects
-                        </h6>
+                        <h6>{ 7 } Projects</h6>
                     </label>
 
-                    
                     <div class="dropdown-content">
                         
                         <div class="project-item" id="calc">
@@ -142,7 +116,7 @@
                     <input type="checkbox" id="intermediate-projects-toggle" class="toggle-checkbox">
                     <label class="dropdown-header intermediate-projects" for="intermediate-projects-toggle">
                         <h1>Intermediate Projects</h1>
-                        <h6 class='project-count'><?php echo countDirectories("My-Projects/Intermediate Projects") ?> Projects</h6>
+                        <h6>{ 0 } Projects</h6>
                     </label>
                     
                     <div class="dropdown-content">
@@ -151,7 +125,6 @@
                         <p>Coming Soon..</p>
                         <p>Coming Soon..</p>
                         <p>Coming Soon..</p>
-
 
                     </div>
                 </div>
@@ -160,7 +133,7 @@
                     <input type="checkbox" id="advanced-projects-toggle" class="toggle-checkbox">
                     <label class="dropdown-header advanced-projects" for="advanced-projects-toggle">
                         <h1>Advanced Projects</h1>
-                        <h6 class='project-count'><?php echo countDirectories("My-Projects/Advanced Projects") ?> Projects</h6>
+                        <h6>{ 0 } Projects</h6>
                     </label>
                     
                     <div class="dropdown-content">
@@ -170,18 +143,13 @@
                         <p>Coming Soon..</p>
                         <p>Coming Soon..</p>
 
-                        
                     </div>
                 </div>
             </div>
             
-            
-            
-
             <br><br>
             <hr>
             <br><br>
-
 
             <div class= "work-experience" id= "work-experience">
 
@@ -263,4 +231,3 @@
 </body>
 
 </html>
-
