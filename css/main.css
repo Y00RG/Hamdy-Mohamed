@@ -1,74 +1,72 @@
-/* Resetting default margin and padding */
+/* Reset default margin and padding */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-/* Set the background color of the entire page */
 body {
     background-color: rgb(24, 26, 27);
-    color: #fff; /* Set default text color */
-    font-family: Arial, sans-serif; /* Set default font family */
+    color: #fff;
+    font-family: Arial, sans-serif;
 }
 
-/* Container to hold both left and right side sections */
 .profile-container {
-    display: flex; /* Use flexbox */
+    display: flex;
 }
 
-/* Styling for the left side section */
 .left-section {
-    flex: 0 0 50%; /* Take up half of the available space */
-    padding: 100px; /* Add padding for spacing */
-    position: fixed; /* Fix the left side */
-    top: 0; /* Align to the top */
-    left: 0; /* Align to the left */
-    height: 100vh; /* Full height of the viewport */
-    overflow-y: auto; /* Add vertical scrollbar if content exceeds viewport */
+    flex: 0 0 50%;
+    padding: 100px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    overflow-y: auto;
 }
 
-/* Styling for the right side section */
 .right-section {
-    flex: 1; /* Take up the remaining space */
-    padding: 100px; /* Add padding for spacing */
-    margin-left: 50%; /* Push right side content beside the fixed left side */
-    transition: margin-left 0.5s ease; /* Add transition effect */
+    flex: 1;
+    padding: 100px;
+    margin-left: 50%;
+    transition: margin-left 0.5s ease;
 }
 
-/* Add space between project divs */
 .projects > .project-item {
-    margin-bottom: 50px; /* Add margin-bottom for spacing */
+    margin-bottom: 50px;
 }
 
-/* Add transition effect to project div h2, p, and img elements */
 .projects > .project-item h2,
 .projects > .project-item p,
 .projects > .project-item img {
-    transition: transform 0.5s ease-out; /* Add transition effect */
-    transform: scale(1); /* Set initial scale */
+    transition: transform 0.5s ease-out;
+    transform: scale(1);
 }
 
-/* Apply hover effect to project div h2, p, and img elements */
 .projects > .project-item:hover h2,
 .projects > .project-item:hover p,
 .projects > .project-item:hover img {
-    transform: scale(1.1); /* Zoom in the elements */
+    transform: scale(1.1);
 }
 
 a:hover {
-    border-bottom-color: white; /* Change border bottom color on hover */
-    transform: translateX(5px); /* Move the link 5px to the right on hover */
+    border-bottom-color: white;
+    transform: translateX(5px);
 }
 
-/* Styling for headings */
-h1, h2, h3, h4, h5, h6 {
-    color: #fff; /* Set heading color */
-    margin-bottom: 20px; /* Add margin to the bottom of headings */
+h1, h2, h3, h4, h5{
+    color: #fff;
+    margin-bottom: 20px;
     margin-top: 5px;
 }
 
-/* Blockquote main style */
+h6 {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 12px;
+    line-height: 1.6;
+    margin-bottom: 40px;
+}
+
 .blockquote {
     position: relative;
     font-family: 'Barlow Condensed', sans-serif;
@@ -77,34 +75,30 @@ h1, h2, h3, h4, h5, h6 {
     align-self: center;
 }
 
-/* Styling for paragraphs */
 p {
-    color: rgba(255, 255, 255, 0.8); /* Set paragraph color with slight opacity */
-    font-size: 16px; /* Set default font size for paragraphs */
-    line-height: 1.6; /* Set line height for better readability */
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 16px;
+    line-height: 1.6;
     margin-bottom: 40px;
 }
 
-/* Styling for links */
 a {
-    color: #fff; /* Set link color */
-    text-decoration: none; /* Remove underline */
-    border-bottom: 1px solid transparent; /* Add transparent border bottom */
-    transition: border-bottom-color 0.3s ease, transform 0.3s ease; /* Add transition effect */
-    display: inline-block; /* Make the links inline-block to control their positioning */
-    vertical-align: middle; /* Align the links vertically in the middle */
-    margin-right: 25px; /* Add space between each link */
+    color: #fff;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-bottom-color 0.3s ease, transform 0.3s ease;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 25px;
 }
 
-/* Styling for the footer */
 .contact-info {
-    display: flex; /* Use flexbox to align items horizontally */
-    justify-content: center; /* Center the items horizontally */
-    align-items: center; /* Center the items vertically */
-    margin-top: 90px; /* Adjust the top margin as needed */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 90px;
 }
 
-/* Styling for the profile logo */
 #profile-logo {
     width: 96px;
     height: 96px;
@@ -113,44 +107,37 @@ a {
     margin-top: 5px;
 }
 
-/* Styling for the links */
 .contact-info a {
-    display: flex; /* Use flexbox to align items horizontally */
-    align-items: center; /* Center the items vertically */
-    text-decoration: none; /* Remove underline from links */
-    margin: 0 8px; /* Adjust margin between links */
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    margin: 0 8px;
 }
 
-/* Styling for the icons */
 .contact-info a i {
-    margin-right: 5px; /* Adjust margin between icon and text */
+    margin-right: 5px;
 }
 
-#project-link{
+#project-link {
     margin-top: 100px;
-
 }
 
 ul {
-    list-style: none; /* Remove default bullet points */
+    list-style: none;
 }
 
-/* Styling for horizontal rules */
 .right-section hr {
     height: 1px;
-    background-color: rgba(255, 255, 255, 0.7); /* Adjust RGBA values for semi-transparent white */
+    background-color: rgba(255, 255, 255, 0.7);
     border: none;
     position: relative;
     margin: 20px 0;
     animation: float 2s linear infinite alternate;
 }
 
-
-/* Styling for the nav links */
 .nav-links li {
-    margin-bottom: 20px; /* Add space between each list item */
+    margin-bottom: 20px;
 }
-
 
 @keyframes float {
     0% {
@@ -161,127 +148,93 @@ ul {
     }
 }
 
-/* Media queries for responsiveness */
-
-/* Consolidate duplicate media queries for better maintainability */
-
-/* For screen sizes up to 768px (small devices like smartphones) */
 @media screen and (max-width: 768px) {
     .profile-container {
-        flex-direction: column; /* Stack sections vertically */
+        flex-direction: column;
     }
 
     .left-section,
     .right-section {
-        width: 100%; /* Make both sides take up full width */
-        padding: 50px; /* Adjust padding for smaller screens */
-        position: static; /* Remove fixed positioning */
-        margin: 0; /* Reset margin */
+        width: 100%;
+        padding: 50px;
+        position: static;
+        margin: 0;
     }
 
     #profile-logo {
-        display: none; /* Hide the logo on smaller screens if necessary */
+        display: none;
     }
 
     .projects > .project-item {
-        margin-bottom: 30px; /* Reduce margin between projects for smaller screens */
+        margin-bottom: 30px;
     }
 }
 
-/* Add styles for dropdown menus */
 .dropdown-container {
-    margin-bottom: 40px; /* Increase margin between dropdown containers */
+    margin-bottom: 40px;
 }
 
-/* Hide the checkbox */
 .toggle-checkbox {
     display: none;
 }
 
 .dropdown-header {
     cursor: pointer;
-    margin-bottom: 30px; /* Increase margin between header and projects */
-    border: 2px solid rgba(0, 0, 0, 0.2); /* Add border around header with transparency */
-    border-radius: 10px; /* Add border radius */
-    padding: 20px; /* Add padding to header */
-    display: inline-block; /* Ensure full width */
-    width: fit-content; /* Set width based on content */
-    text-align: center; /* Center-align text */
+    margin-bottom: 30px;
+    border: 2px solid rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    padding: 20px;
+    display: inline-block;
+    width: fit-content;
+    text-align: center;
 }
 
 .dropdown-header > h1, 
 .dropdown-header > h6 {
-    transition: transform 0.5s ease-out; /* Add transition effect */
-    margin: 0; /* Remove default margin */
+    transition: transform 0.5s ease-out;
+    margin: 0;
 }
 
 .dropdown-content {
     display: none;
-    margin-top: 20px; /* Increase margin between header and content */
+    margin-top: 20px;
 }
 
-/* Display content when the associated mark is specific */
 .toggle-checkbox:checked + .dropdown-header + .dropdown-content {
     display: block;
 }
 
-/* Apply hover effect to dropdown headers */
 .dropdown-header:hover > h1,
 .dropdown-header:hover > h6 {
-    transform: scale(1.1); /* Zoom in effect */
+    transform: scale(1.1);
 }
 
-/* Apply hover effect to projects inside the dropdown content */
 .dropdown-content .project-item {
-    transition: transform 0.5s ease-out; /* Add transition effect */
-    margin-bottom: 20px; /* Increase margin between projects */
+    transition: transform 0.5s ease-out;
+    margin-bottom: 20px;
 }
 
 .dropdown-content .project-item:hover {
-    transform: scale(1.1); /* Zoom in effect */
+    transform: scale(1.1);
 }
 
+/* Ensure the logo is always visible within this viewport range */
+@media screen and (max-width: 1200px) {
+    #profile-logo {
+        display: block;
+    }
+}
 
-/* To hide a specific project with id  */
-/* #calc {
-    display: none;
-} */
-
-
-
-/* For screen sizes between 769px and 1200px (medium devices like tablets) */
 @media screen and (min-width: 769px) and (max-width: 1200px) {
     .left-section,
     .right-section {
-        width: 50%; /* Make both sides take up half of the width */
+        width: 50%;
     }
 }
 
-/* For screen sizes above 1200px (large devices like desktops) */
 @media screen and (min-width: 1201px) {
     .profile-container {
-        max-width: 1200px; /* Limit container width for large screens */
-        margin: 0 auto; /* Center container horizontally */
+        max-width: 1200px;
+        margin: 0 auto;
     }
-}
-
-/* Additional responsive settings based on your provided CSS code */
-@media only screen and (max-width: 879px) and (min-width: 1020px) {
-    /* Add your additional responsive settings here */
-}
-
-@media only screen and (min-width: 781px) and (max-width: 1020px) {
-    /* Add your additional responsive settings here */
-}
-
-@media only screen and (max-width: 780px) {
-    /* Add your additional responsive settings here */
-}
-
-@media only screen and (max-width: 768px) {
-    /* Add your additional responsive settings here */
-}
-
-@media only screen and (max-width: 500px) {
-    /* Add your additional responsive settings here */
 }
