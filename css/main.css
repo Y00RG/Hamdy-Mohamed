@@ -139,6 +139,12 @@ ul {
     margin-bottom: 20px;
 }
 
+/* Same size for all projects images */
+img {
+    max-width: 300px; 
+    height: auto; 
+}
+
 @keyframes float {
     0% {
         transform: translateX(0);
