@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Turquoise Hexagon Sun</title>
+
+<style>
+
+@layer base, settings;
+
+@layer settings {
+  .planet-roygbiv {
+    --size: 2.8vmin;
+    --orbit-size: .76;
+    --orbit-inclination: .4;
+    --color: #8f8a;
+    --orbit-start: calc(320 * var(--day));
+  }
+
+  .planet-aquaris {
+    --size: 1.5vmin;
+    --orbit-size: .79;
+    --orbit-inclination: .3;
+    --orbit-start: calc(60 * var(--day));
+  }
+
+  .planet-gemini {
+    --size: 1vmin;
+    --orbit-size: .82;
+    --orbit-inclination: .2;
+    --orbit-start: calc(20 * var(--day));
+  }
+
+  .planet-corsair {
+    --size: 1.75vmin;
+    --orbit-size: .85;
+    --orbit-inclination: .15;
+    --orbit-start: calc(270 * var(--day));
+    --color: #b98b;
+  }
+
+  .planet-cold-earth {
+    --size: 1vmin;
+    --orbit-size: .88;
+    --orbit-inclination: .1;
+    --orbit-start: calc(120 * var(--day));
+    --color: #08fc;
+  }
+
+  .planet-dandelion {
+    --size: 3vmin;
+    --orbit-size: .91;
+    --orbit-inclination: 0.1;
+    --orbit-start: calc(90 * var(--day));
+  }
+}
+
+@layer base {
+  body {
+    height: 100vh;
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+    background-color: #000;
+    background-image: radial-gradient(
+      circle at center,
+      #4cc3 15%,
+      transparent 66%
+    );
+  }
+
+  body::after {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    opacity: .2;
+    mix-blend-mode: soft-light;
+    background-image:
+      linear-gradient(
+        0deg,
+        transparent,
+        transparent 45%,
+        #fffa 50%,
+        transparent 55%,
+        transparent
+      );
+  }
+
+  @keyframes scale {
+    50% {
+      scale: .95;
+    }
+  }
+
+  .sun {
+    --width: 20vmin;
+    --height: 17vmin;
+    position: relative;
+    width: var(--width);
+    height: var(--height);
+    animation: scale 4s ease-in-out infinite;
+  }
+
+  @supports (width: calc(1px * sqrt(3))) {
+    .sun {
+      --height: calc(var(--width) / 2 * sqrt(3));
+    }
+  }
+
+  .sun div {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50%;
+    height: 50%;
+    mix-blend-mode: plus-lighter;
+    background: currentColor;
+    color: oklch(
+      calc(93% + (var(--i) * 1%))
+      calc(1 + (var(--i) / 10))
+      calc(180 + var(--i) * 3)
+    );
+    animation: glow infinite ease-in-out 2s;
+    animation-delay: calc(var(--i) * -420ms);
+
+    &:nth-child(1) {
+      transform:
+        translateZ(0)
+        translateX(50%);
+    }
+
+    &:nth-child(2) {
+      transform-origin: top left;
+      transform:
+        translateZ(0)
+        translateX(150%)
+        rotate(60deg);
+    }
+
+    &:nth-child(3) {
+      transform-origin: top right;
+      transform:
+        translateZ(0)
+        translateX(-50%)
+        rotate(-60deg);
+    }
+
+    &:nth-child(4) {
+      transform:
+        translateZ(0)
+        translate(50%, 100%);
+    }
+
+    &:nth-child(5) {
+      transform-origin: bottom left;
+      transform:
+        translateZ(0)
+        translate(150%, 100%)
+        rotate(-60deg);
+    }
+
+    &:nth-child(6) {
+      transform-origin: bottom right;
+      transform:
+        translateZ(0)
+        translate(-50%, 100%)
+        rotate(60deg);
+    }
+  }
+
+  .scope {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      circle at center,
+      transparent 20%,
+      #000 66%
+    );
+    pointer-events: none;
+  }
+
+  .planet {
+    --year: calc((
+      var(--orbit-size) *
+      var(--orbit-size) *
+      var(--orbit-size)
+    ) * 30s);
+    --day: calc(var(--year) / 360);
+    position: absolute;
+    width: var(--size);
+    height: var(--size);
+    background: currentColor;
+    border-radius: 50%;
+    translate-x: -50%;
+    translate-y: -50%;
+    pointer-events: none;
+    animation:
+      orbit ease-in-out infinite,
+      z-index linear infinite,
+      shadow ease-in-out infinite,
+      highlight ease-in-out infinite;
+    animation-duration: var(--year);
+    animation-delay: calc(var(--orbit-start) * -1);
+  }
+}
+
+@keyframes orbit {
+  from, to {
+    top: calc(
+      50% +
+      (var(--orbit-size) * 50%) * var(--orbit-inclination)
+    );
+    left: calc(
+      (100% - var(--orbit-size) * 100%) +
+      (var(--orbit-size) * 50%) * var(--orbit-inclination)
+    );
+  }
+  25% {
+    scale: calc(1 + 1 * var(--orbit-size));
+  }
+  75% {
+    scale: calc(1 - .5 * var(--orbit-size));
+  }
+  50% {
+    top: calc(
+      50% -
+      (var(--orbit-size) * 50%) * var(--orbit-inclination)
+    );
+    left: calc(
+      var(--orbit-size) * 100% -
+      (var(--orbit-size) * 50%) * var(--orbit-inclination)
+    );
+  }
+}
+
+@keyframes glow {
+  from, to {
+    box-shadow: 0 0 2.4em 1.6em;
+  }
+  50% {
+    box-shadow: 0 0 1.5em 1.25em;
+  }
+}
+
+@keyframes z-index {
+  0%, 49% {
+    z-index: 0;
+  }
+  50%, to {
+    z-index: -1;
+  }
+}
+
+@keyframes shadow {
+  from, to, 50% {
+    color: #066;
+  }
+  18%, 30% {
+    color: #200;
+  }
+  75% {
+    color: #0dd;
+  }
+}
+
+@keyframes highlight {
+  from, to {
+    box-shadow:
+      inset
+      calc(var(--size) / (-20 * var(--orbit-inclination)))
+      calc(var(--size) / (20 * (1 - var(--orbit-inclination))))
+      calc(var(--size) / 5)
+      var(--color, #0ffa);
+  }
+  20%, 25% {
+    box-shadow: none;
+  }
+  50% {
+    box-shadow:
+      inset
+      calc(var(--size) / (20 * var(--orbit-inclination)))
+      calc(var(--size) / (-20 * (1 - var(--orbit-inclination))))
+      calc(var(--size) / 5)
+      var(--color, #0ffa);
+  }
+  75% {
+    box-shadow:
+      inset
+      calc(var(--size) / (5 * var(--orbit-inclination)))
+      calc(var(--size) / (-5 * (1 - var(--orbit-inclination))))
+      calc(var(--size) * 2)
+      var(--color, #0ffa);
+  }
+  76% {
+    box-shadow:
+      inset
+      calc(var(--size) / (-5 * var(--orbit-inclination)))
+      calc(var(--size) / (5 * (1 - var(--orbit-inclination))))
+      calc(var(--size) * 2)
+      var(--color, #0ffa);
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="sun">
+  <div style="--i: 1"></div>
+  <div style="--i: 2"></div>
+  <div style="--i: 3"></div>
+  <div style="--i: 4"></div>
+  <div style="--i: 5"></div>
+  <div style="--i: 6"></div>
+</div>
+<div class="planet planet-roygbiv"></div>
+<div class="planet planet-aquaris"></div>
+<div class="planet planet-gemini"></div>
+<div class="planet planet-corsair"></div>
+<div class="planet planet-cold-earth"></div>
+<div class="planet planet-dandelion"></div>
+<div class="scope"></div>
+
+
+</body>
+
+<script>
+
+</script>
+</html>
