@@ -1,4 +1,5 @@
 Sub Automatic_BO()
+    ActiveWindow.DisplayFormulas = False
 
     Dim LastRow As Long
     Dim LastRowBO As Long
@@ -188,32 +189,39 @@ Sub Automatic_BO()
     '========================================================
     ' STEP 9 - VLOOKUP in CAR
     '========================================================
-
+    
     With ActiveWorkbook.Worksheets("CAR")
 
         LastRow = .Cells(.Rows.Count, "D").End(xlUp).Row
 
         If LastRow >= 2 Then
-
+        
+            ' Make sure Column C is not formatted as Text
+            .Range("C:C").NumberFormat = "General"
+            
             ' Put VLOOKUP in C2
             .Range("C2").Formula = _
                 "=VLOOKUP(D2,'[BO . Coding.xlsx]Car'!$A:$B,2,0)"
 
-            ' Fill formula down to actual last row
+            ' Fill formula down to actual data
             .Range("C2").AutoFill _
                 Destination:=.Range("C2:C" & LastRow)
 
-            ' Calculate formulas
-            .Calculate
+            ' Force Excel to calculate
+            Application.CalculateFull
+        
 
             ' Convert formulas to values
-            .Range("C2:C" & LastRow).Value = _
-                .Range("C2:C" & LastRow).Value
-
+            .Range("C2:C" & LastRow).Copy
+            
+            .Range("C2:C" & LastRow).PasteSpecial _
+                Paste:=xlPasteValues
+                
+            Application.DataEntryMode = False
+            
         End If
 
     End With
-
 
     '========================================================
     ' STEP 10 - Sort CAR dynamically
@@ -250,22 +258,30 @@ Sub Automatic_BO()
         LastRow = .Cells(.Rows.Count, "D").End(xlUp).Row
 
         If LastRow >= 2 Then
-
+        
+            ' Make sure Column C is not formatted as Text
+            .Range("C:C").NumberFormat = "General"
+            
             ' Put VLOOKUP in C2
             .Range("C2").Formula = _
                 "=VLOOKUP(D2,'[BO . Coding.xlsx]LME'!$A:$B,2,0)"
 
-            ' Fill formula down to actual last row
+            ' Fill formula down to actual data
             .Range("C2").AutoFill _
                 Destination:=.Range("C2:C" & LastRow)
 
-            ' Calculate formulas
-            .Calculate
+            ' Force Excel to calculate
+            Application.CalculateFull
+        
 
             ' Convert formulas to values
-            .Range("C2:C" & LastRow).Value = _
-                .Range("C2:C" & LastRow).Value
-
+            .Range("C2:C" & LastRow).Copy
+            
+            .Range("C2:C" & LastRow).PasteSpecial _
+                Paste:=xlPasteValues
+                
+            Application.DataEntryMode = False
+            
         End If
 
     End With
