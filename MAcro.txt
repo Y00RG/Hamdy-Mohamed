@@ -57,19 +57,14 @@ Sub Automatic_BO()
 
     If LastRowBO >= 2 Then
 
-        ' Apply filter on Column G
-        ' Show only Rejected OR Blank
+        ' Filter Column G for Rejected OR Blank
         ActiveSheet.Range("A1:G" & LastRowBO).AutoFilter _
             Field:=7, _
             Criteria1:="=Rejected", _
             Operator:=xlOr, _
             Criteria2:="="
 
-
-        '----------------------------------------------------
-        ' Find only the visible rows created by the filter
-        '----------------------------------------------------
-
+        ' Find only the visible rows after filtering
         Set VisibleRows = Nothing
 
         On Error Resume Next
@@ -79,26 +74,14 @@ Sub Automatic_BO()
 
         On Error GoTo 0
 
-
-        '----------------------------------------------------
-        ' Delete ONLY the filtered rows
-        '----------------------------------------------------
-
+        ' Delete only the filtered rows
         If Not VisibleRows Is Nothing Then
-
             VisibleRows.EntireRow.Delete Shift:=xlUp
-
         End If
 
-
-        ' Clear the variable
         Set VisibleRows = Nothing
 
-
-        '----------------------------------------------------
-        ' Remove the filter
-        '----------------------------------------------------
-
+        ' Remove Filter
         If ActiveSheet.AutoFilterMode Then
 
             On Error Resume Next
@@ -107,8 +90,7 @@ Sub Automatic_BO()
 
         End If
 
-
-        ' Recalculate the actual last row
+        ' Recalculate last row
         LastRowBO = Cells(Rows.Count, "A").End(xlUp).Row
 
     End If
@@ -178,7 +160,6 @@ Sub Automatic_BO()
 
     End If
 
-
     ActiveSheet.Range("A1:G" & LastRowBO).AutoFilter _
         Field:=1, _
         Criteria1:=Array("MCF", "UMC", "MGS"), _
@@ -214,11 +195,20 @@ Sub Automatic_BO()
 
         If LastRow >= 2 Then
 
+            ' Put VLOOKUP in C2
             .Range("C2").Formula = _
                 "=VLOOKUP(D2,'[BO . Coding.xlsx]Car'!$A:$B,2,0)"
 
+            ' Fill formula down to actual last row
             .Range("C2").AutoFill _
                 Destination:=.Range("C2:C" & LastRow)
+
+            ' Calculate formulas
+            .Calculate
+
+            ' Convert formulas to values
+            .Range("C2:C" & LastRow).Value = _
+                .Range("C2:C" & LastRow).Value
 
         End If
 
@@ -261,11 +251,20 @@ Sub Automatic_BO()
 
         If LastRow >= 2 Then
 
+            ' Put VLOOKUP in C2
             .Range("C2").Formula = _
                 "=VLOOKUP(D2,'[BO . Coding.xlsx]LME'!$A:$B,2,0)"
 
+            ' Fill formula down to actual last row
             .Range("C2").AutoFill _
                 Destination:=.Range("C2:C" & LastRow)
+
+            ' Calculate formulas
+            .Calculate
+
+            ' Convert formulas to values
+            .Range("C2:C" & LastRow).Value = _
+                .Range("C2:C" & LastRow).Value
 
         End If
 
