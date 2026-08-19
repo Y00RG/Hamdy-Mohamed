@@ -1,0 +1,112 @@
+Sub Forma_Print()
+'
+' Forma_Print Macro
+'
+
+'
+    Sheets("BO Settled").Select
+    Range("A1").Select
+    ActiveCell.FormulaR1C1 = "8/19/2026"
+    Range("A2").Select
+    Sheets("BO Settled").Select
+    Sheets("BO Settled").Copy After:=Workbooks("BO.xlsx").Sheets(3)
+    Sheets("LME").Select
+    Range("A1").Select
+    Selection.End(xlUp).Select
+    Range("B2:C2").Select
+    Range(Selection, Selection.End(xlDown)).Select
+    Selection.Copy
+    Sheets("BO Settled").Select
+    Range("I2").Select
+    Selection.PasteSpecial Paste:=xlPasteAllUsingSourceTheme, Operation:=xlNone _
+        , SkipBlanks:=False, Transpose:=False
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+    Sheets("LME").Select
+    Range("E24").Select
+    Selection.End(xlUp).Select
+    Range("E2:F2").Select
+    Range(Selection, Selection.End(xlDown)).Select
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("BO Settled").Select
+    Range("K2").Select
+    ActiveSheet.Paste
+    Selection.PasteSpecial Paste:=xlPasteAllUsingSourceTheme, Operation:=xlNone _
+        , SkipBlanks:=False, Transpose:=False
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+    Range("H2:H4").Select
+    Application.CutCopyMode = False
+    Selection.AutoFill Destination:=Range("H2:H33")
+    Range("H2:H33").Select
+    Range("I2").Select
+    Range(Selection, Selection.End(xlToRight)).Select
+    Range(Selection, Selection.End(xlDown)).Select
+    With Selection.Font
+        .Name = "Arial"
+        .Size = 18
+        .Strikethrough = False
+        .Superscript = False
+        .Subscript = False
+        .OutlineFont = False
+        .Shadow = False
+        .Underline = xlUnderlineStyleNone
+        .Color = -16777216
+        .TintAndShade = 0
+        .ThemeFont = xlThemeFontNone
+    End With
+    Selection.Font.Bold = True
+    Sheets("CAR").Select
+    Range("B2:C2").Select
+    Range(Selection, Selection.End(xlDown)).Select
+    Selection.Copy
+    Sheets("BO Settled").Select
+    Range("C2").Select
+    ActiveSheet.Paste
+    Selection.PasteSpecial Paste:=xlPasteAllUsingSourceTheme, Operation:=xlNone _
+        , SkipBlanks:=False, Transpose:=False
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+    Sheets("CAR").Select
+    Range("E25").Select
+    Selection.End(xlUp).Select
+    Range("E2:F2").Select
+    Range(Selection, Selection.End(xlDown)).Select
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets("BO Settled").Select
+    Range("E2").Select
+    Selection.PasteSpecial Paste:=xlPasteAllUsingSourceTheme, Operation:=xlNone _
+        , SkipBlanks:=False, Transpose:=False
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+    Range("B2:B4").Select
+    Application.CutCopyMode = False
+    Selection.AutoFill Destination:=Range("B2:B44")
+    Range("B2:B44").Select
+    Range("C2:D2").Select
+    Range(Selection, Selection.End(xlDown)).Select
+    Range("C2:F44").Select
+    With Selection.Font
+        .Name = "Arial"
+        .Size = 18
+        .Strikethrough = False
+        .Superscript = False
+        .Subscript = False
+        .OutlineFont = False
+        .Shadow = False
+        .Underline = xlUnderlineStyleNone
+        .Color = -16777216
+        .TintAndShade = 0
+        .ThemeFont = xlThemeFontNone
+    End With
+    Selection.Font.Bold = True
+    ActiveWindow.SmallScroll Down:=-18
+    Cells.Select
+    Cells.EntireColumn.AutoFit
+    Range("G3").Select
+    Windows("Automatic_BO.xlsm").Activate
+    Sheets("Sheet1").Select
+    Range("A1").Select
+End Sub
