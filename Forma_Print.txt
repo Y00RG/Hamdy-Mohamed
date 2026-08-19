@@ -1,112 +1,265 @@
 Sub Forma_Print()
-'
-' Forma_Print Macro
-'
 
-'
-    Sheets("BO Settled").Select
-    Range("A1").Select
-    ActiveCell.FormulaR1C1 = "8/19/2026"
-    Range("A2").Select
-    Sheets("BO Settled").Select
-    Sheets("BO Settled").Copy After:=Workbooks("BO.xlsx").Sheets(3)
-    Sheets("LME").Select
-    Range("A1").Select
-    Selection.End(xlUp).Select
-    Range("B2:C2").Select
-    Range(Selection, Selection.End(xlDown)).Select
-    Selection.Copy
-    Sheets("BO Settled").Select
-    Range("I2").Select
-    Selection.PasteSpecial Paste:=xlPasteAllUsingSourceTheme, Operation:=xlNone _
-        , SkipBlanks:=False, Transpose:=False
-    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
-        :=False, Transpose:=False
-    Sheets("LME").Select
-    Range("E24").Select
-    Selection.End(xlUp).Select
-    Range("E2:F2").Select
-    Range(Selection, Selection.End(xlDown)).Select
+    Dim wbBO As Workbook
+    Dim wsTemplate As Worksheet
+    Dim wsPrint As Worksheet
+    Dim wsLME As Worksheet
+    Dim wsCAR As Worksheet
+    
+    Dim LastRowLME As Long
+    Dim LastRowCAR As Long
+
+
+    '========================================================
+    ' WORKBOOKS / SHEETS
+    '========================================================
+
+    Set wbBO = Workbooks("BO.xlsx")
+    Set wsTemplate = ThisWorkbook.Worksheets("BO Settled")
+    
+    Set wsLME = wbBO.Worksheets("LME")
+    Set wsCAR = wbBO.Worksheets("CAR")
+
+
+    '========================================================
+    ' STEP 1 - Set today's date in the template
+    '========================================================
+
+    wsTemplate.Range("A1").Value = Date
+    wsTemplate.Range("A1").NumberFormat = "m/d/yyyy"
+
+
+    '========================================================
+    ' STEP 2 - Copy BO Settled template to BO.xlsx
+    '========================================================
+
+    wsTemplate.Copy After:=wbBO.Sheets(3)
+    
+    Set wsPrint = wbBO.ActiveSheet
+
+
+    '========================================================
+    ' STEP 3 - Find actual last row in LME
+    '========================================================
+
+    LastRowLME = wsLME.Cells(wsLME.Rows.Count, "B").End(xlUp).Row
+
+
+    '========================================================
+    ' STEP 4 - Copy LME Name + Status
+    ' B:C  --->  I:J
+    '========================================================
+
+    If LastRowLME >= 2 Then
+
+        wsLME.Range("B2:C" & LastRowLME).Copy
+
+        wsPrint.Range("I2").PasteSpecial _
+            Paste:=xlPasteAllUsingSourceTheme, _
+            Operation:=xlNone, _
+            SkipBlanks:=False, _
+            Transpose:=False
+
+        wsPrint.Range("I2").PasteSpecial _
+            Paste:=xlPasteValues, _
+            Operation:=xlNone, _
+            SkipBlanks:=False, _
+            Transpose:=False
+
+    End If
+
+
+    '========================================================
+    ' STEP 5 - Copy LME Branch + Rim No
+    ' E:F  --->  K:L
+    '========================================================
+
+    If LastRowLME >= 2 Then
+
+        wsLME.Range("E2:F" & LastRowLME).Copy
+
+        wsPrint.Range("K2").PasteSpecial _
+            Paste:=xlPasteAllUsingSourceTheme, _
+            Operation:=xlNone, _
+            SkipBlanks:=False, _
+            Transpose:=False
+
+        wsPrint.Range("K2").PasteSpecial _
+            Paste:=xlPasteValues, _
+            Operation:=xlNone, _
+            SkipBlanks:=False, _
+            Transpose:=False
+
+    End If
+
+
+    '========================================================
+    ' STEP 6 - Generate LME numbering dynamically
+    ' H = #
+    '========================================================
+
+    If LastRowLME >= 2 Then
+
+        wsPrint.Range("H2:H" & LastRowLME).Value = _
+            wsPrint.Evaluate("ROW(1:" & LastRowLME - 1 & ")")
+
+    End If
+
+
+    '========================================================
+    ' STEP 7 - Format LME area
+    '========================================================
+    
+    If LastRowLME >= 2 Then
+    
+        With wsPrint.Range("H2:L" & LastRowLME)
+    
+            With .Font
+                .Name = "Arial"
+                .Size = 18
+                .Bold = True
+                .Strikethrough = False
+                .Superscript = False
+                .Subscript = False
+                .OutlineFont = False
+                .Shadow = False
+                .Underline = xlUnderlineStyleNone
+                .Color = -16777216
+                .TintAndShade = 0
+                .ThemeFont = xlThemeFontNone
+            End With
+    
+            With .Borders
+                .LineStyle = xlContinuous
+                .Weight = xlThin
+            End With
+    
+        End With
+    
+    End If
+
+
+    '========================================================
+    ' STEP 8 - Find actual last row in CAR
+    '========================================================
+
+    LastRowCAR = wsCAR.Cells(wsCAR.Rows.Count, "B").End(xlUp).Row
+
+
+    '========================================================
+    ' STEP 9 - Copy CAR Name + Status
+    ' B:C  --->  C:D
+    '========================================================
+
+    If LastRowCAR >= 2 Then
+
+        wsCAR.Range("B2:C" & LastRowCAR).Copy
+
+        wsPrint.Range("C2").PasteSpecial _
+            Paste:=xlPasteAllUsingSourceTheme, _
+            Operation:=xlNone, _
+            SkipBlanks:=False, _
+            Transpose:=False
+
+        wsPrint.Range("C2").PasteSpecial _
+            Paste:=xlPasteValues, _
+            Operation:=xlNone, _
+            SkipBlanks:=False, _
+            Transpose:=False
+
+    End If
+
+
+    '========================================================
+    ' STEP 10 - Copy CAR Branch + Rim No
+    ' E:F  --->  E:F
+    '========================================================
+
+    If LastRowCAR >= 2 Then
+
+        wsCAR.Range("E2:F" & LastRowCAR).Copy
+
+        wsPrint.Range("E2").PasteSpecial _
+            Paste:=xlPasteAllUsingSourceTheme, _
+            Operation:=xlNone, _
+            SkipBlanks:=False, _
+            Transpose:=False
+
+        wsPrint.Range("E2").PasteSpecial _
+            Paste:=xlPasteValues, _
+            Operation:=xlNone, _
+            SkipBlanks:=False, _
+            Transpose:=False
+
+    End If
+
+
+    '========================================================
+    ' STEP 11 - Generate CAR numbering dynamically
+    ' B = #
+    '========================================================
+
+    If LastRowCAR >= 2 Then
+
+        wsPrint.Range("B2:B" & LastRowCAR).Value = _
+            wsPrint.Evaluate("ROW(1:" & LastRowCAR - 1 & ")")
+
+    End If
+
+
+    '========================================================
+    ' STEP 12 - Format CAR area
+    '========================================================
+    
+    If LastRowCAR >= 2 Then
+
+        With wsPrint.Range("B2:F" & LastRowCAR)
+
+            With .Font
+                .Name = "Arial"
+                .Size = 18
+                .Bold = True
+                .Strikethrough = False
+                .Superscript = False
+                .Subscript = False
+                .OutlineFont = False
+                .Shadow = False
+                .Underline = xlUnderlineStyleNone
+                .Color = -16777216
+                .TintAndShade = 0
+                .ThemeFont = xlThemeFontNone
+            End With
+    
+            With .Borders
+                .LineStyle = xlContinuous
+                .Weight = xlThin
+            End With
+
+        End With
+
+    End If
+
+
+    '========================================================
+    ' STEP 13 - AutoFit columns
+    '========================================================
+
+    wsPrint.Cells.EntireColumn.AutoFit
+
+
+    '========================================================
+    ' STEP 14 - Clear clipboard
+    '========================================================
+
     Application.CutCopyMode = False
-    Selection.Copy
-    Sheets("BO Settled").Select
-    Range("K2").Select
-    ActiveSheet.Paste
-    Selection.PasteSpecial Paste:=xlPasteAllUsingSourceTheme, Operation:=xlNone _
-        , SkipBlanks:=False, Transpose:=False
-    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
-        :=False, Transpose:=False
-    Range("H2:H4").Select
-    Application.CutCopyMode = False
-    Selection.AutoFill Destination:=Range("H2:H33")
-    Range("H2:H33").Select
-    Range("I2").Select
-    Range(Selection, Selection.End(xlToRight)).Select
-    Range(Selection, Selection.End(xlDown)).Select
-    With Selection.Font
-        .Name = "Arial"
-        .Size = 18
-        .Strikethrough = False
-        .Superscript = False
-        .Subscript = False
-        .OutlineFont = False
-        .Shadow = False
-        .Underline = xlUnderlineStyleNone
-        .Color = -16777216
-        .TintAndShade = 0
-        .ThemeFont = xlThemeFontNone
-    End With
-    Selection.Font.Bold = True
-    Sheets("CAR").Select
-    Range("B2:C2").Select
-    Range(Selection, Selection.End(xlDown)).Select
-    Selection.Copy
-    Sheets("BO Settled").Select
-    Range("C2").Select
-    ActiveSheet.Paste
-    Selection.PasteSpecial Paste:=xlPasteAllUsingSourceTheme, Operation:=xlNone _
-        , SkipBlanks:=False, Transpose:=False
-    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
-        :=False, Transpose:=False
-    Sheets("CAR").Select
-    Range("E25").Select
-    Selection.End(xlUp).Select
-    Range("E2:F2").Select
-    Range(Selection, Selection.End(xlDown)).Select
-    Application.CutCopyMode = False
-    Selection.Copy
-    Sheets("BO Settled").Select
-    Range("E2").Select
-    Selection.PasteSpecial Paste:=xlPasteAllUsingSourceTheme, Operation:=xlNone _
-        , SkipBlanks:=False, Transpose:=False
-    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
-        :=False, Transpose:=False
-    Range("B2:B4").Select
-    Application.CutCopyMode = False
-    Selection.AutoFill Destination:=Range("B2:B44")
-    Range("B2:B44").Select
-    Range("C2:D2").Select
-    Range(Selection, Selection.End(xlDown)).Select
-    Range("C2:F44").Select
-    With Selection.Font
-        .Name = "Arial"
-        .Size = 18
-        .Strikethrough = False
-        .Superscript = False
-        .Subscript = False
-        .OutlineFont = False
-        .Shadow = False
-        .Underline = xlUnderlineStyleNone
-        .Color = -16777216
-        .TintAndShade = 0
-        .ThemeFont = xlThemeFontNone
-    End With
-    Selection.Font.Bold = True
-    ActiveWindow.SmallScroll Down:=-18
-    Cells.Select
-    Cells.EntireColumn.AutoFit
-    Range("G3").Select
-    Windows("Automatic_BO.xlsm").Activate
-    Sheets("Sheet1").Select
-    Range("A1").Select
+
+
+    '========================================================
+    ' FINISH
+    '========================================================
+
+    ThisWorkbook.Activate
+    ThisWorkbook.Worksheets("Sheet1").Select
+    ThisWorkbook.Worksheets("Sheet1").Range("A1").Select
+
 End Sub
