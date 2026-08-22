@@ -8,6 +8,7 @@ Sub Forma_Print()
     
     Dim LastRowLME As Long
     Dim LastRowCAR As Long
+    Dim i As Long
 
 
     '========================================================
@@ -94,7 +95,28 @@ Sub Forma_Print()
 
 
     '========================================================
-    ' STEP 6 - Generate LME numbering dynamically
+    ' STEP 6 - Clean LME Branch Names
+    ' K = Branch
+    '========================================================
+
+    If LastRowLME >= 2 Then
+
+        For i = 2 To LastRowLME
+
+            If Len(Trim(wsPrint.Cells(i, "K").Value)) > 0 Then
+
+                wsPrint.Cells(i, "K").Value = _
+                    CleanBranch(wsPrint.Cells(i, "K").Value)
+
+            End If
+
+        Next i
+
+    End If
+
+
+    '========================================================
+    ' STEP 7 - Generate LME numbering dynamically
     ' H = #
     '========================================================
 
@@ -107,7 +129,7 @@ Sub Forma_Print()
 
 
     '========================================================
-    ' STEP 7 - Format LME area
+    ' STEP 8 - Format LME area
     '========================================================
     
     If LastRowLME >= 2 Then
@@ -140,14 +162,14 @@ Sub Forma_Print()
 
 
     '========================================================
-    ' STEP 8 - Find actual last row in CAR
+    ' STEP 9 - Find actual last row in CAR
     '========================================================
 
     LastRowCAR = wsCAR.Cells(wsCAR.Rows.Count, "B").End(xlUp).Row
 
 
     '========================================================
-    ' STEP 9 - Copy CAR Name + Status
+    ' STEP 10 - Copy CAR Name + Status
     ' B:C  --->  C:D
     '========================================================
 
@@ -171,7 +193,7 @@ Sub Forma_Print()
 
 
     '========================================================
-    ' STEP 10 - Copy CAR Branch + Rim No
+    ' STEP 11 - Copy CAR Branch + Rim No
     ' E:F  --->  E:F
     '========================================================
 
@@ -195,7 +217,28 @@ Sub Forma_Print()
 
 
     '========================================================
-    ' STEP 11 - Generate CAR numbering dynamically
+    ' STEP 12 - Clean CAR Branch Names
+    ' E = Branch
+    '========================================================
+
+    If LastRowCAR >= 2 Then
+
+        For i = 2 To LastRowCAR
+
+            If Len(Trim(wsPrint.Cells(i, "E").Value)) > 0 Then
+
+                wsPrint.Cells(i, "E").Value = _
+                    CleanBranch(wsPrint.Cells(i, "E").Value)
+
+            End If
+
+        Next i
+
+    End If
+
+
+    '========================================================
+    ' STEP 13 - Generate CAR numbering dynamically
     ' B = #
     '========================================================
 
@@ -208,13 +251,13 @@ Sub Forma_Print()
 
 
     '========================================================
-    ' STEP 12 - Format CAR area
+    ' STEP 14 - Format CAR area
     '========================================================
     
     If LastRowCAR >= 2 Then
-
+    
         With wsPrint.Range("B2:F" & LastRowCAR)
-
+    
             With .Font
                 .Name = "Arial"
                 .Size = 18
@@ -234,21 +277,84 @@ Sub Forma_Print()
                 .LineStyle = xlContinuous
                 .Weight = xlThin
             End With
-
+    
         End With
+    
+    End If
+    
+    
+    '========================================================
+    ' STEP 15 - CLEAN BRANCHES + AUTOFIT + FINISH
+    '========================================================
+    
+    CleanBranchesAndFinish wsPrint, LastRowCAR, LastRowLME
+
+End Sub
+
+
+'============================================================
+' CLEAN BRANCHES + AUTOFIT + FINISH
+'============================================================
+
+Private Sub CleanBranchesAndFinish( _
+    ByVal wsPrint As Worksheet, _
+    ByVal LastRowCAR As Long, _
+    ByVal LastRowLME As Long)
+
+    Dim i As Long
+
+
+    '========================================================
+    ' CLEAN CAR BRANCHES
+    ' CAR Branch = Column F
+    '========================================================
+
+    If LastRowCAR >= 2 Then
+
+        For i = 2 To LastRowCAR
+
+            If Len(Trim(wsPrint.Cells(i, "F").Value)) > 0 Then
+
+                wsPrint.Cells(i, "F").Value = _
+                    CleanBranch(wsPrint.Cells(i, "F").Value)
+
+            End If
+
+        Next i
 
     End If
 
 
     '========================================================
-    ' STEP 13 - AutoFit columns
+    ' CLEAN LME BRANCHES
+    ' LME Branch = Column K
+    '========================================================
+
+    If LastRowLME >= 2 Then
+
+        For i = 2 To LastRowLME
+
+            If Len(Trim(wsPrint.Cells(i, "K").Value)) > 0 Then
+
+                wsPrint.Cells(i, "K").Value = _
+                    CleanBranch(wsPrint.Cells(i, "K").Value)
+
+            End If
+
+        Next i
+
+    End If
+
+
+    '========================================================
+    ' AutoFit AFTER cleaning all branch names
     '========================================================
 
     wsPrint.Cells.EntireColumn.AutoFit
 
 
     '========================================================
-    ' STEP 14 - Clear clipboard
+    ' Clear clipboard
     '========================================================
 
     Application.CutCopyMode = False
@@ -263,3 +369,116 @@ Sub Forma_Print()
     ThisWorkbook.Worksheets("Sheet1").Range("A1").Select
 
 End Sub
+
+
+'============================================================
+' CLEAN BRANCH FUNCTION
+'============================================================
+
+Private Function CleanBranch(ByVal BranchName As String) As String
+
+    Dim Branch As String
+
+    '--------------------------------------------------------
+    ' Remove spaces before and after the branch name
+    '--------------------------------------------------------
+
+    Branch = Trim(BranchName)
+
+
+    '--------------------------------------------------------
+    ' Branch mapping
+    '--------------------------------------------------------
+
+    Select Case Branch
+
+        Case "Sodic Strip Mall Branch"
+            CleanBranch = "Sodic"
+
+        Case "Emad ElDin Branch"
+            CleanBranch = "Emad ElDin"
+
+        Case "Cairo Festival City"
+            CleanBranch = "Cairo Festival"
+
+        Case "Lebanon Street"
+            CleanBranch = "Lebanon"
+
+        Case "Heliopolis Al andalous"
+            CleanBranch = "Al andalous"
+
+        Case "Heliopolis Meriland"
+            CleanBranch = "Meriland"
+
+        Case "New Maadi - Road 9"
+            CleanBranch = "New Maadi"
+
+        Case "Korba Branch"
+            CleanBranch = "Korba"
+
+        Case "ElObour City Branch"
+            CleanBranch = "ElObour"
+
+        Case "kafr El Sheikh Elgaish street"
+            CleanBranch = "kafr El Sheikh"
+
+        Case "Zagazig Elgalaa street"
+            CleanBranch = "Zagazig Elgalaa"
+
+        Case "Tanta Elgaish street"
+            CleanBranch = "Tanta Elgaish"
+
+        Case "ElRehab Branch"
+            CleanBranch = "ElRehab"
+
+        Case "ElThawra str Branch"
+            CleanBranch = "ElThawra"
+
+        Case "Sohag Nile branch"
+            CleanBranch = "Sohag Nile"
+
+        Case "Sheraton Branch"
+            CleanBranch = "Sheraton"
+
+        Case "Hurghada Branch"
+            CleanBranch = "Hurghada"
+
+        Case "Madinaty Branch"
+            CleanBranch = "Madinaty"
+
+        Case "New Cairo Branch"
+            CleanBranch = "New Cairo"
+
+        Case "El Shams Branch"
+            CleanBranch = "El Shams"
+
+        Case "Arabella Branch"
+            CleanBranch = "Arabella"
+
+        Case "Salah Salem Branch"
+            CleanBranch = "Salah Salem"
+
+        Case "Assiut Gomhouria Street"
+            CleanBranch = "Assiut Gomhouria"
+
+        Case "Minia - korrniash bransh"
+            CleanBranch = "Minia - korrniash"
+
+        Case "Shoubra Branch"
+            CleanBranch = "Shoubra"
+
+        Case "Sohag"
+            CleanBranch = "Sohag"
+
+        '----------------------------------------------------
+        ' Unknown branch:
+        ' Keep the original name but remove spaces
+        ' before and after it.
+        '----------------------------------------------------
+
+        Case Else
+            CleanBranch = Trim(Branch)
+
+    End Select
+
+End Function
