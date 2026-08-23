@@ -22,30 +22,113 @@ Sub Automatic_BO()
 
     '========================================================
     ' STEP 2 - Copy cleaned BO data to settled cases report
+    '          Add today's date + match old row format
+    '          + position screen at the newly added data
     '========================================================
-
+    
     LastRowBO = Cells(Rows.Count, "A").End(xlUp).Row
-
+    
     If LastRowBO >= 2 Then
-
+    
+        '----------------------------------------------------
+        ' Define source data
+        '----------------------------------------------------
+        
+        Dim NewStartRow As Long
+        Dim NewEndRow As Long
+        Dim OldLastRow As Long
+        
+        NewStartRow = 0
+        NewEndRow = 0
+        OldLastRow = 0
+    
+        '----------------------------------------------------
+        ' Copy BO data
+        '----------------------------------------------------
+        
         Range("A2:G" & LastRowBO).Copy
-
+    
         Windows("BO report ( Setteled cases ).xlsx").Activate
-
+    
+        '----------------------------------------------------
+        ' Find first empty row after old data
+        '----------------------------------------------------
+        
         LastRowReport = Cells(Rows.Count, "A").End(xlUp).Row
-
+        
         If LastRowReport < 1 Then
             LastRowReport = 1
         End If
-
-        Range("A" & LastRowReport + 1).PasteSpecial xlPasteAll
-
+    
+        ' Keep the last old row for formatting
+        OldLastRow = LastRowReport
+    
+        ' First row of new data
+        NewStartRow = LastRowReport + 1
+    
+        ' Number of rows being added
+        NewEndRow = NewStartRow + LastRowBO - 2
+    
+        '----------------------------------------------------
+        ' Paste new data
+        '----------------------------------------------------
+        
+        Range("A" & NewStartRow).PasteSpecial _
+            Paste:=xlPasteAll
+    
         Application.CutCopyMode = False
-
+    
+        '----------------------------------------------------
+        ' Add today's date in column H
+        '----------------------------------------------------
+        
+        Range("H" & NewStartRow & ":H" & NewEndRow).Value = Date
+    
+        '----------------------------------------------------
+        ' Copy FORMAT ONLY from the last old row
+        ' to all newly added rows
+        '----------------------------------------------------
+        
+        Range("A" & OldLastRow & ":H" & OldLastRow).Copy
+    
+        Range("A" & NewStartRow & ":H" & NewEndRow).PasteSpecial _
+            Paste:=xlPasteFormats
+    
+        Application.CutCopyMode = False
+    
+        '----------------------------------------------------
+        ' Re-enter today's date after applying the format
+        ' This guarantees the date is a real date value
+        ' while keeping the old date format.
+        '----------------------------------------------------
+        
+        Range("H" & NewStartRow & ":H" & NewEndRow).Value = Date
+    
+        '----------------------------------------------------
+        ' Save the report
+        '----------------------------------------------------
+        
         ActiveWorkbook.Save
-
+    
+        '----------------------------------------------------
+        ' Position the screen around the newly added data
+        '
+        ' The last new row will be visible with several
+        ' empty rows underneath it.
+        '----------------------------------------------------
+        
+        Range("A" & NewEndRow).Select
+    
+        If NewEndRow > 12 Then
+            ActiveWindow.ScrollRow = NewEndRow - 10
+        Else
+            ActiveWindow.ScrollRow = 1
+        End If
+    
+        ' Keep the last added row selected
+        Range("A" & NewEndRow).Select
+    
     End If
-
 
     '========================================================
     ' STEP 3 - Return to BO.xlsx
