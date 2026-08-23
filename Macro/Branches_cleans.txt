@@ -25,6 +25,6 @@ Branch = Clean Branch
 "Minia - korrniash bransh" = "Minia - korrniash"
 "Shoubra Branch" = "Shoubra"
 "Sohag" = "Sohag"
-
+"Assiut Saed Zakhlol street" = "Assiut Saed Zakhlol"
 
 
