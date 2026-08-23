@@ -122,7 +122,7 @@ Sub Automatic_BO()
 
     ActiveSheet.Range("A1:G" & LastRowBO).AutoFilter _
         Field:=1, _
-        Criteria1:=Array("LME", "LSG", "LSC", "LUG", "LSH", "LSE", "IMF"), _
+        Criteria1:=Array("LME", "LSG", "LSC", "LUG", "LSH", "LSE", "IMF", "LBU"), _
         Operator:=xlFilterValues
 
 
@@ -163,7 +163,7 @@ Sub Automatic_BO()
 
     ActiveSheet.Range("A1:G" & LastRowBO).AutoFilter _
         Field:=1, _
-        Criteria1:=Array("MCF", "UMC", "MGS"), _
+        Criteria1:=Array("MCF", "UMC", "MGS", "MGF", "MKF", "JMB"), _
         Operator:=xlFilterValues
 
 
