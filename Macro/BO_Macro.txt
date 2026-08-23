@@ -1,0 +1,322 @@
+Sub Automatic_BO()
+    ActiveWindow.DisplayFormulas = False
+
+    Dim LastRow As Long
+    Dim LastRowBO As Long
+    Dim LastRowReport As Long
+    Dim VisibleRows As Range
+
+    '========================================================
+    ' STEP 1 - Open and prepare BO.xlsx
+    '========================================================
+
+    Windows("BO.xlsx").Activate
+
+    Cells.Select
+    Cells.EntireColumn.AutoFit
+
+    Columns("A:K").Delete Shift:=xlToLeft
+    Columns("D:E").Delete Shift:=xlToLeft
+    Columns("G:AO").Delete Shift:=xlToLeft
+
+
+    '========================================================
+    ' STEP 2 - Copy cleaned BO data to settled cases report
+    '========================================================
+
+    LastRowBO = Cells(Rows.Count, "A").End(xlUp).Row
+
+    If LastRowBO >= 2 Then
+
+        Range("A2:G" & LastRowBO).Copy
+
+        Windows("BO report ( Setteled cases ).xlsx").Activate
+
+        LastRowReport = Cells(Rows.Count, "A").End(xlUp).Row
+
+        If LastRowReport < 1 Then
+            LastRowReport = 1
+        End If
+
+        Range("A" & LastRowReport + 1).PasteSpecial xlPasteAll
+
+        Application.CutCopyMode = False
+
+        ActiveWorkbook.Save
+
+    End If
+
+
+    '========================================================
+    ' STEP 3 - Return to BO.xlsx
+    ' Delete Rejected and Blank rows automatically
+    '========================================================
+
+    Windows("BO.xlsx").Activate
+
+    LastRowBO = Cells(Rows.Count, "A").End(xlUp).Row
+
+    If LastRowBO >= 2 Then
+
+        ' Filter Column G for Rejected OR Blank
+        ActiveSheet.Range("A1:G" & LastRowBO).AutoFilter _
+            Field:=7, _
+            Criteria1:="=Rejected", _
+            Operator:=xlOr, _
+            Criteria2:="="
+
+        ' Find only the visible rows after filtering
+        Set VisibleRows = Nothing
+
+        On Error Resume Next
+
+        Set VisibleRows = ActiveSheet.Range("A2:G" & LastRowBO) _
+            .SpecialCells(xlCellTypeVisible)
+
+        On Error GoTo 0
+
+        ' Delete only the filtered rows
+        If Not VisibleRows Is Nothing Then
+            VisibleRows.EntireRow.Delete Shift:=xlUp
+        End If
+
+        Set VisibleRows = Nothing
+
+        ' Remove Filter
+        If ActiveSheet.AutoFilterMode Then
+
+            On Error Resume Next
+            ActiveSheet.ShowAllData
+            On Error GoTo 0
+
+        End If
+
+        ' Recalculate last row
+        LastRowBO = Cells(Rows.Count, "A").End(xlUp).Row
+
+    End If
+
+
+    '========================================================
+    ' STEP 4 - Rearrange columns
+    '========================================================
+
+    Columns("E:E").Cut
+    Columns("D:D").Insert Shift:=xlToRight
+
+    Columns("B:B").Cut
+    Columns("G:G").Insert Shift:=xlToRight
+
+    If LastRowBO >= 2 Then
+        Range("C2:C" & LastRowBO).ClearContents
+    End If
+
+    Range("A1").Select
+
+
+    '========================================================
+    ' STEP 5 - Filter LME products
+    '========================================================
+
+    LastRowBO = Cells(Rows.Count, "A").End(xlUp).Row
+
+    ActiveSheet.Range("A1:G" & LastRowBO).AutoFilter _
+        Field:=1, _
+        Criteria1:=Array("LME", "LSG", "LSC", "LUG", "LSH", "LSE", "IMF"), _
+        Operator:=xlFilterValues
+
+
+    '========================================================
+    ' STEP 6 - Copy filtered LME data to new sheet
+    '========================================================
+
+    LastRowBO = Cells(Rows.Count, "A").End(xlUp).Row
+
+    Range("A1:G" & LastRowBO).SpecialCells(xlCellTypeVisible).Copy
+
+    Sheets.Add After:=ActiveSheet
+    ActiveSheet.Name = "LME"
+
+    Range("A1").PasteSpecial xlPasteAll
+
+    Application.CutCopyMode = False
+
+    Cells.Select
+    Cells.EntireColumn.AutoFit
+
+
+    '========================================================
+    ' STEP 7 - Return to Report 1 and filter CAR products
+    '========================================================
+
+    Sheets("Report 1").Select
+
+    LastRowBO = Cells(Rows.Count, "A").End(xlUp).Row
+
+    If ActiveSheet.AutoFilterMode Then
+
+        On Error Resume Next
+        ActiveSheet.ShowAllData
+        On Error GoTo 0
+
+    End If
+
+    ActiveSheet.Range("A1:G" & LastRowBO).AutoFilter _
+        Field:=1, _
+        Criteria1:=Array("MCF", "UMC", "MGS"), _
+        Operator:=xlFilterValues
+
+
+    '========================================================
+    ' STEP 8 - Copy filtered CAR data to new sheet
+    '========================================================
+
+    LastRowBO = Cells(Rows.Count, "A").End(xlUp).Row
+
+    Range("A1:G" & LastRowBO).SpecialCells(xlCellTypeVisible).Copy
+
+    Sheets.Add After:=ActiveSheet
+    ActiveSheet.Name = "CAR"
+
+    Range("A1").PasteSpecial xlPasteAll
+
+    Application.CutCopyMode = False
+
+    Cells.Select
+    Cells.EntireColumn.AutoFit
+
+
+    '========================================================
+    ' STEP 9 - VLOOKUP in CAR
+    '========================================================
+    
+    With ActiveWorkbook.Worksheets("CAR")
+
+        LastRow = .Cells(.Rows.Count, "D").End(xlUp).Row
+
+        If LastRow >= 2 Then
+        
+            ' Make sure Column C is not formatted as Text
+            .Range("C:C").NumberFormat = "General"
+            
+            ' Put VLOOKUP in C2
+            .Range("C2").Formula = _
+                "=VLOOKUP(D2,'[BO . Coding.xlsx]Car'!$A:$B,2,0)"
+
+            ' Fill formula down to actual data
+            .Range("C2").AutoFill _
+                Destination:=.Range("C2:C" & LastRow)
+
+            ' Force Excel to calculate
+            Application.CalculateFull
+        
+
+            ' Convert formulas to values
+            .Range("C2:C" & LastRow).Copy
+            
+            .Range("C2:C" & LastRow).PasteSpecial _
+                Paste:=xlPasteValues
+                
+            Application.DataEntryMode = False
+            
+        End If
+
+    End With
+
+    '========================================================
+    ' STEP 10 - Sort CAR dynamically
+    '========================================================
+
+    With ActiveWorkbook.Worksheets("CAR").Sort
+
+        .SortFields.Clear
+
+        .SortFields.Add2 _
+            Key:=ActiveWorkbook.Worksheets("CAR").Range("C2:C" & LastRow), _
+            SortOn:=xlSortOnValues, _
+            Order:=xlAscending, _
+            DataOption:=xlSortNormal
+
+        .SetRange _
+            ActiveWorkbook.Worksheets("CAR").Range("A2:G" & LastRow)
+
+        .Header = xlNo
+        .MatchCase = False
+        .Orientation = xlTopToBottom
+        .SortMethod = xlPinYin
+        .Apply
+
+    End With
+
+
+    '========================================================
+    ' STEP 11 - VLOOKUP in LME
+    '========================================================
+
+    With ActiveWorkbook.Worksheets("LME")
+
+        LastRow = .Cells(.Rows.Count, "D").End(xlUp).Row
+
+        If LastRow >= 2 Then
+        
+            ' Make sure Column C is not formatted as Text
+            .Range("C:C").NumberFormat = "General"
+            
+            ' Put VLOOKUP in C2
+            .Range("C2").Formula = _
+                "=VLOOKUP(D2,'[BO . Coding.xlsx]LME'!$A:$B,2,0)"
+
+            ' Fill formula down to actual data
+            .Range("C2").AutoFill _
+                Destination:=.Range("C2:C" & LastRow)
+
+            ' Force Excel to calculate
+            Application.CalculateFull
+        
+
+            ' Convert formulas to values
+            .Range("C2:C" & LastRow).Copy
+            
+            .Range("C2:C" & LastRow).PasteSpecial _
+                Paste:=xlPasteValues
+                
+            Application.DataEntryMode = False
+            
+        End If
+
+    End With
+
+
+    '========================================================
+    ' STEP 12 - Sort LME dynamically
+    '========================================================
+
+    With ActiveWorkbook.Worksheets("LME").Sort
+
+        .SortFields.Clear
+
+        .SortFields.Add2 _
+            Key:=ActiveWorkbook.Worksheets("LME").Range("C2:C" & LastRow), _
+            SortOn:=xlSortOnValues, _
+            Order:=xlAscending, _
+            DataOption:=xlSortNormal
+
+        .SetRange _
+            ActiveWorkbook.Worksheets("LME").Range("A2:G" & LastRow)
+
+        .Header = xlNo
+        .MatchCase = False
+        .Orientation = xlTopToBottom
+        .SortMethod = xlPinYin
+        .Apply
+
+    End With
+
+
+    '========================================================
+    ' FINISH
+    '========================================================
+
+    Windows("Automatic_BO.xlsm").Activate
+
+End Sub
