@@ -470,6 +470,9 @@ Private Function CleanBranch(ByVal BranchName As String) As String
         Case "Sohag"
             CleanBranch = "Sohag"
 
+        Case "Assiut Saed Zakhlol street"
+            CleanBranch = "Assiut Saed Zakhlol"
+
         '----------------------------------------------------
         ' Unknown branch:
         ' Keep the original name but remove spaces
