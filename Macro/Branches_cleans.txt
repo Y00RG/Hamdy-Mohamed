@@ -28,3 +28,6 @@ Branch = Clean Branch
 "Assiut Saed Zakhlol street" = "Assiut Saed Zakhlol"
 
 =IF(OR(ISNUMBER(SEARCH("Fully S", j2)), AND( ISNUMBER(SEARCH("Secured", j2)), ISERROR(SEARCH("unsecured", j2)), ISERROR(SEARCH("non secured", j2)))), "Fully Secured", "Clean")
+
+
+=IF(AND(ISERROR(SEARCH("unsecured";J2));ISERROR(SEARCH("non secured";J2));OR(ISNUMBER(SEARCH("Fully S";J2));ISNUMBER(SEARCH("Secured";J2))));"Fully Secured";"Clean")
