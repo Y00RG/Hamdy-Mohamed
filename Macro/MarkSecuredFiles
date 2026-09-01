@@ -1,0 +1,184 @@
+Sub MarkSecuredFiles()
+
+    Dim wbBO As Workbook
+    Dim wbCoding As Workbook
+    
+    Dim wsLME As Worksheet
+    Dim wsCAR As Worksheet
+    Dim wsCodingLME As Worksheet
+    Dim wsCodingCAR As Worksheet
+    
+    Dim LastRowLME As Long
+    Dim LastRowCAR As Long
+    Dim LastRowCodingLME As Long
+    Dim LastRowCodingCAR As Long
+    
+    Dim i As Long
+    Dim LoanAC As String
+    
+    Dim SecuredLME As Object
+    Dim SecuredCAR As Object
+    
+    
+    '========================================================
+    ' WORKBOOKS / SHEETS
+    '========================================================
+    
+    Set wbBO = Workbooks("BO.xlsx")
+    Set wbCoding = Workbooks("BO . Coding.xlsx")
+    
+    Set wsLME = wbBO.Worksheets("LME")
+    Set wsCAR = wbBO.Worksheets("CAR")
+    
+    Set wsCodingLME = wbCoding.Worksheets("LME")
+    Set wsCodingCAR = wbCoding.Worksheets("Car")
+    
+    
+    '========================================================
+    ' CREATE DICTIONARIES
+    '========================================================
+    
+    Set SecuredLME = CreateObject("Scripting.Dictionary")
+    Set SecuredCAR = CreateObject("Scripting.Dictionary")
+    
+    
+    '========================================================
+    ' STEP 1 - Read Fully Secured LME accounts
+    '
+    ' Coding LME:
+    ' A = Loan A/C
+    ' D = Clean/Secured
+    '========================================================
+    
+    LastRowCodingLME = _
+        wsCodingLME.Cells(wsCodingLME.Rows.Count, "A").End(xlUp).Row
+    
+    If LastRowCodingLME >= 2 Then
+    
+        For i = 2 To LastRowCodingLME
+        
+            If UCase(Trim(CStr(wsCodingLME.Cells(i, "D").Value))) = _
+               "FULLY SECURED" Then
+            
+                LoanAC = Trim(CStr(wsCodingLME.Cells(i, "A").Value))
+                
+                If Len(LoanAC) > 0 Then
+                    SecuredLME(LoanAC) = True
+                End If
+            
+            End If
+        
+        Next i
+    
+    End If
+    
+    
+    '========================================================
+    ' STEP 2 - Read Fully Secured CAR accounts
+    '
+    ' Coding CAR:
+    ' A = Loan A/C
+    ' D = Clean/Secured
+    '========================================================
+    
+    LastRowCodingCAR = _
+        wsCodingCAR.Cells(wsCodingCAR.Rows.Count, "A").End(xlUp).Row
+    
+    If LastRowCodingCAR >= 2 Then
+    
+        For i = 2 To LastRowCodingCAR
+        
+            If UCase(Trim(CStr(wsCodingCAR.Cells(i, "D").Value))) = _
+               "FULLY SECURED" Then
+            
+                LoanAC = Trim(CStr(wsCodingCAR.Cells(i, "A").Value))
+                
+                If Len(LoanAC) > 0 Then
+                    SecuredCAR(LoanAC) = True
+                End If
+            
+            End If
+        
+        Next i
+    
+    End If
+    
+    
+    '========================================================
+    ' STEP 3 - Mark Fully Secured LME files
+    '
+    ' BO.xlsx LME:
+    ' D = Loan A/C
+    '
+    ' A:G = Entire data row
+    '========================================================
+    
+    LastRowLME = _
+        wsLME.Cells(wsLME.Rows.Count, "D").End(xlUp).Row
+    
+    If LastRowLME >= 2 Then
+    
+        For i = 2 To LastRowLME
+        
+            LoanAC = Trim(CStr(wsLME.Cells(i, "D").Value))
+            
+            If Len(LoanAC) > 0 Then
+            
+                If SecuredLME.Exists(LoanAC) Then
+                
+                    wsLME.Range("A" & i & ":G" & i).Interior.Color = _
+                        RGB(128, 128, 128)
+                
+                End If
+            
+            End If
+        
+        Next i
+    
+    End If
+    
+    
+    '========================================================
+    ' STEP 4 - Mark Fully Secured CAR files
+    '
+    ' BO.xlsx CAR:
+    ' D = Loan A/C
+    '
+    ' A:G = Entire data row
+    '========================================================
+    
+    LastRowCAR = _
+        wsCAR.Cells(wsCAR.Rows.Count, "D").End(xlUp).Row
+    
+    If LastRowCAR >= 2 Then
+    
+        For i = 2 To LastRowCAR
+        
+            LoanAC = Trim(CStr(wsCAR.Cells(i, "D").Value))
+            
+            If Len(LoanAC) > 0 Then
+            
+                If SecuredCAR.Exists(LoanAC) Then
+                
+                    wsCAR.Range("A" & i & ":G" & i).Interior.Color = _
+                        RGB(128, 128, 128)
+                
+                End If
+            
+            End If
+        
+        Next i
+    
+    End If
+    
+    
+    '========================================================
+    ' STEP 5 - Finish
+    '========================================================
+    
+    Application.CutCopyMode = False
+    
+    wbBO.Activate
+    
+End Sub
+
