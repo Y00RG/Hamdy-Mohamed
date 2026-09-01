@@ -31,3 +31,10 @@ Branch = Clean Branch
 
 
 =IF(AND(ISERROR(SEARCH("unsecured";J2));ISERROR(SEARCH("non secured";J2));OR(ISNUMBER(SEARCH("Fully S";J2));ISNUMBER(SEARCH("Secured";J2))));"Fully Secured";"Clean")
+
+
+
+
+=IF(AND(ISERROR(SEARCH("unsecured",J2)),ISERROR(SEARCH("non secured",J2)),OR(ISNUMBER(SEARCH("Fully S",J2)),ISNUMBER(SEARCH("Secured",J2)))),"Fully Secured","Clean")
+
+
