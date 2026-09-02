@@ -1,0 +1,64 @@
+' ==================
+' Sort_Booking Macro
+' ==================
+
+'
+    Windows("Booking.xlsx").Activate
+    ActiveSheet.Range("$A$1:$J$28354").AutoFilter Field:=9, Criteria1:=Array( _
+        "El Yousr", "El Yousr Deviation secured", "El Yousrsecured", "Ijara Housing"), _
+        Operator:=xlFilterValues
+    Range("A1").Select
+    Range(Selection, Selection.End(xlToRight)).Select
+    Range(Selection, Selection.End(xlDown)).Select
+    Selection.Copy
+    Sheets.Add After:=ActiveSheet
+    Sheets("Sheet1").Select
+    Sheets("Sheet1").Name = "LME"
+    ActiveSheet.Paste
+    Sheets("Report 1").Select
+    Range("I7407").Select
+    Selection.End(xlUp).Select
+    ActiveSheet.Range("$A$1:$J$28354").AutoFilter Field:=9
+    ActiveSheet.Range("$A$1:$J$28354").AutoFilter Field:=9, Criteria1:=Array( _
+        "Indirect Sales ????????", "????????", "???????? ????????", "????????secured", "=") _
+        , Operator:=xlFilterValues
+    Range("A1").Select
+    Range(Selection, Selection.End(xlToRight)).Select
+    Range(Selection, Selection.End(xlDown)).Select
+    Application.CutCopyMode = False
+    Selection.Copy
+    Sheets.Add After:=ActiveSheet
+    Sheets("Sheet2").Select
+    Sheets("Sheet2").Name = "CAR"
+    ActiveSheet.Paste
+    Application.CutCopyMode = False
+    ActiveWorkbook.Worksheets("CAR").Sort.SortFields.Clear
+    ActiveWorkbook.Worksheets("CAR").Sort.SortFields.Add2 Key:=Range("G2:G20935") _
+        , SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:=xlSortNormal
+    ActiveWorkbook.Worksheets("CAR").Sort.SortFields.Add2 Key:=Range("A2:A20935") _
+        , SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:=xlSortNormal
+    With ActiveWorkbook.Worksheets("CAR").Sort
+        .SetRange Range("A1:J20935")
+        .Header = xlYes
+        .MatchCase = False
+        .Orientation = xlTopToBottom
+        .SortMethod = xlPinYin
+        .Apply
+    End With
+    Sheets("LME").Select
+    ActiveWorkbook.Worksheets("LME").Sort.SortFields.Clear
+    ActiveWorkbook.Worksheets("LME").Sort.SortFields.Add2 Key:=Range("G2:G7420") _
+        , SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:=xlSortNormal
+    ActiveWorkbook.Worksheets("LME").Sort.SortFields.Add2 Key:=Range("A2:A7420") _
+        , SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:=xlSortNormal
+    With ActiveWorkbook.Worksheets("LME").Sort
+        .SetRange Range("A1:J7420")
+        .Header = xlYes
+        .MatchCase = False
+        .Orientation = xlTopToBottom
+        .SortMethod = xlPinYin
+        .Apply
+    End With
+    Windows("Automatic_Booking.xlsm").Activate
+    Range("A1").Select
+End Sub
