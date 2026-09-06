@@ -411,7 +411,7 @@ Private Function CleanBranch(ByVal BranchName As String) As String
             CleanBranch = "Meriland"
 
         Case "New Maadi - Road 9"
-            CleanBranch = "New Maadi"
+            CleanBranch = "Maadi  - Road 9"
 
         Case "Korba Branch"
             CleanBranch = "Korba"
