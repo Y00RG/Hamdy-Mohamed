@@ -246,7 +246,7 @@ Sub Automatic_BO()
 
     ActiveSheet.Range("A1:G" & LastRowBO).AutoFilter _
         Field:=1, _
-        Criteria1:=Array("MCF", "UMC", "MGS", "MGF", "MKF", "JMB"), _
+        Criteria1:=Array("MCF", "UMC", "MGS", "MGF", "MKF", "JMB", "BIK"), _
         Operator:=xlFilterValues
 
 
