@@ -28,3 +28,12 @@ Branch = Clean Branch
 "Assiut Saed Zakhlol street" = "Assiut Saed Zakhlol"
 
 
+Dear Managers,
+I’m pleased to announce that I have developed a new automation workflow for daily BO Settled Report,
+Before we were perform too many manual steps which in large Cycle periods of BO report during a month, 
+It was a big mentally headache,
+
+New automation method pros:
+	Reduce human mistakes.
+	Enhance speed and efficiency.
+	
