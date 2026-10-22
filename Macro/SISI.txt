@@ -1,1 +1,2 @@
-Any product name contain the word Fully or Gold or both consider it secured file and color it with the gray color.
+Any product name contain the word Fully or Gold or both consider it a secured file and color it with the gray color anything else even if its empty consider it a clean file and dont color it.
+
