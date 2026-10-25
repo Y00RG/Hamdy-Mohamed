@@ -1,0 +1,894 @@
+'============================================================
+' MAIN BO AUTOMATION
+' Source headers are identified by their names, not fixed
+' source column letters.
+'============================================================
+Public Sub Automatic_BO()
+
+    Dim wbBO As Workbook
+    Dim wbReport As Workbook
+    Dim wsBO As Worksheet
+    Dim wsReport As Worksheet
+    Dim wsLME As Worksheet
+    Dim wsCAR As Worksheet
+
+    Dim LastRowBO As Long
+    Dim LastRowReport As Long
+    Dim LastRowCAR As Long
+    Dim LastRowLME As Long
+    Dim OldLastRow As Long
+    Dim NewStartRow As Long
+    Dim NewEndRow As Long
+    Dim ApprovedRejectedCol As Long
+    Dim TypeCol As Long
+    Dim i As Long
+
+    Dim SourceHeaders As Variant
+    Dim FinalHeaders As Variant
+    Dim ReportSourceHeaders As Variant
+    Dim ReportTargetAliases As Variant
+    Dim SourceCol As Long
+    Dim TargetCol As Long
+    Dim DateCol As Long
+
+    Dim VisibleRows As Range
+    Dim TempSheet As Worksheet
+    Dim TempSheetName As String
+    Dim PreviousScreenUpdating As Boolean
+    Dim PreviousDisplayAlerts As Boolean
+    Dim PreviousEnableEvents As Boolean
+
+    On Error GoTo CleanFail
+
+    PreviousScreenUpdating = Application.ScreenUpdating
+    PreviousDisplayAlerts = Application.DisplayAlerts
+    PreviousEnableEvents = Application.EnableEvents
+
+    Application.ScreenUpdating = False
+    Application.DisplayAlerts = False
+    Application.EnableEvents = False
+    Application.CutCopyMode = False
+
+    Set wbBO = Workbooks("BO.xlsx")
+    Set wbReport = Workbooks("BO report ( Setteled cases ).xlsx")
+    Set wsBO = wbBO.Worksheets("Report 1")
+    Set wsReport = wbReport.Worksheets(1)
+
+    ActiveWindow.DisplayFormulas = False
+
+    '========================================================
+    ' STEP 1 - Rebuild the working columns by HEADER NAME.
+    '
+    ' Intermediate layout used for the report update:
+    ' A Type
+    ' B Rim No
+    ' C Rim Name
+    ' D Acct No
+    ' E Status
+    ' F Product Name
+    ' G Branch
+    ' H Approved / Rejected
+    '
+    ' Product Name remains in BO.xlsx, but is NOT copied to
+    ' the settled-cases report.
+    '========================================================
+
+    SourceHeaders = Array( _
+        "Type", _
+        "Rim No", _
+        "Rim Name", _
+        "Acct No", _
+        "Status", _
+        "Product Name", _
+        "Branch", _
+        "Approved / Rejected")
+
+    LastRowBO = GetLastUsedRow(wsBO)
+    If LastRowBO < 2 Then
+        MsgBox "No BO data rows were found in Report 1.", vbExclamation
+        GoTo CleanExit
+    End If
+
+    ' Create a temporary sheet for safe column reordering.
+    TempSheetName = "__BO_TempLayout"
+    If SheetExists(wbBO, TempSheetName) Then
+        wbBO.Worksheets(TempSheetName).Delete
+    End If
+
+    Set TempSheet = wbBO.Worksheets.Add(After:=wbBO.Worksheets(wbBO.Worksheets.Count))
+    TempSheet.Name = TempSheetName
+
+    For i = LBound(SourceHeaders) To UBound(SourceHeaders)
+        SourceCol = FindHeaderColumn(wsBO, CStr(SourceHeaders(i)), 1)
+
+        If SourceCol = 0 Then
+            Err.Raise vbObjectError + 101, "Automatic_BO", _
+                "Required header not found in BO.xlsx: " & CStr(SourceHeaders(i))
+        End If
+
+        wsBO.Range(wsBO.Cells(1, SourceCol), wsBO.Cells(LastRowBO, SourceCol)).Copy _
+            Destination:=TempSheet.Cells(1, i + 1)
+
+        TempSheet.Columns(i + 1).ColumnWidth = wsBO.Columns(SourceCol).ColumnWidth
+    Next i
+
+    ' Replace Report 1 contents with the eight selected columns only.
+    If wsBO.AutoFilterMode Then
+        On Error Resume Next
+        wsBO.ShowAllData
+        On Error GoTo CleanFail
+        wsBO.AutoFilterMode = False
+    End If
+
+    wsBO.Cells.Clear
+    TempSheet.Range("A1:H" & LastRowBO).Copy Destination:=wsBO.Range("A1")
+
+    For i = 1 To 8
+        wsBO.Columns(i).ColumnWidth = TempSheet.Columns(i).ColumnWidth
+    Next i
+
+    TempSheet.Delete
+    Set TempSheet = Nothing
+    Application.CutCopyMode = False
+
+    '========================================================
+    ' STEP 2 - Append rows to the settled-cases report.
+    '
+    ' Copy these source fields by header:
+    ' Type, Rim No, Rim Name, Acct No, Status, Branch,
+    ' Approved / Rejected.
+    '
+    ' Product Name is deliberately excluded.
+    ' The report's collection-date column receives today's date.
+    '========================================================
+
+    LastRowBO = GetLastUsedRow(wsBO)
+
+    ReportSourceHeaders = Array( _
+        "Type", "Rim No", "Rim Name", "Acct No", "Status", _
+        "Branch", "Approved / Rejected")
+
+    ' Remove the Product Name column previously added by the
+    ' incorrect version, if that header exists in the report.
+    SourceCol = FindHeaderColumn(wsReport, "Product Name", 1)
+    If SourceCol > 0 Then
+        wsReport.Columns(SourceCol).Delete
+    End If
+
+    DateCol = FindHeaderColumnAny(wsReport, 1, Array( _
+        "Approved date from Collection", _
+        "Approved Date from Collection", _
+        "Collection Date"))
+
+    If DateCol = 0 Then
+        Err.Raise vbObjectError + 102, "Automatic_BO", _
+            "Could not find the report date header 'Approved date from Collection'."
+    End If
+
+    ' Locate the destination column for each field by its header.
+    For i = LBound(ReportSourceHeaders) To UBound(ReportSourceHeaders)
+        SourceCol = FindHeaderColumn(wsBO, CStr(ReportSourceHeaders(i)), 1)
+
+        Select Case NormalizeHeader(CStr(ReportSourceHeaders(i)))
+            Case "approvedrejected"
+                TargetCol = FindHeaderColumnAny(wsReport, 1, Array( _
+                    "Accepted Rejected", "Approved Rejected", _
+                    "Approved / Rejected", "Approved/Rejected"))
+            Case Else
+                TargetCol = FindHeaderColumn(wsReport, CStr(ReportSourceHeaders(i)), 1)
+        End Select
+
+        If SourceCol = 0 Then
+            Err.Raise vbObjectError + 103, "Automatic_BO", _
+                "Source header not found while updating report: " & CStr(ReportSourceHeaders(i))
+        End If
+
+        If TargetCol = 0 Then
+            Err.Raise vbObjectError + 104, "Automatic_BO", _
+                "Destination report header not found: " & CStr(ReportSourceHeaders(i))
+        End If
+    Next i
+
+    LastRowReport = GetLastUsedRow(wsReport)
+    If LastRowReport < 1 Then LastRowReport = 1
+
+    OldLastRow = LastRowReport
+    NewStartRow = OldLastRow + 1
+    NewEndRow = NewStartRow + LastRowBO - 2
+
+    ' Copy existing report formatting to the appended rows.
+    If OldLastRow >= 2 Then
+        wsReport.Rows(OldLastRow).Copy
+        wsReport.Rows(NewStartRow & ":" & NewEndRow).PasteSpecial Paste:=xlPasteFormats
+        Application.CutCopyMode = False
+    End If
+
+    ' Copy values only, mapping by column header.
+    For i = LBound(ReportSourceHeaders) To UBound(ReportSourceHeaders)
+        SourceCol = FindHeaderColumn(wsBO, CStr(ReportSourceHeaders(i)), 1)
+
+        Select Case NormalizeHeader(CStr(ReportSourceHeaders(i)))
+            Case "approvedrejected"
+                TargetCol = FindHeaderColumnAny(wsReport, 1, Array( _
+                    "Accepted Rejected", "Approved Rejected", _
+                    "Approved / Rejected", "Approved/Rejected"))
+            Case Else
+                TargetCol = FindHeaderColumn(wsReport, CStr(ReportSourceHeaders(i)), 1)
+        End Select
+
+        wsReport.Range(wsReport.Cells(NewStartRow, TargetCol), _
+                       wsReport.Cells(NewEndRow, TargetCol)).Value = _
+            wsBO.Range(wsBO.Cells(2, SourceCol), _
+                       wsBO.Cells(LastRowBO, SourceCol)).Value
+    Next i
+
+    ' Add today's date in the existing collection-date column.
+    wsReport.Range(wsReport.Cells(NewStartRow, DateCol), _
+                   wsReport.Cells(NewEndRow, DateCol)).Value = Date
+
+    If OldLastRow >= 2 Then
+        wsReport.Range(wsReport.Cells(OldLastRow, DateCol), _
+                       wsReport.Cells(OldLastRow, DateCol)).Copy
+        wsReport.Range(wsReport.Cells(NewStartRow, DateCol), _
+                       wsReport.Cells(NewEndRow, DateCol)).PasteSpecial Paste:=xlPasteFormats
+        Application.CutCopyMode = False
+        wsReport.Range(wsReport.Cells(NewStartRow, DateCol), _
+                       wsReport.Cells(NewEndRow, DateCol)).Value = Date
+    End If
+
+    wbReport.Save
+
+    wsReport.Activate
+    wsReport.Cells(NewEndRow, 1).Select
+    If NewEndRow > 12 Then
+        ActiveWindow.ScrollRow = NewEndRow - 10
+    Else
+        ActiveWindow.ScrollRow = 1
+    End If
+
+    '========================================================
+    ' STEP 3 - Delete Rejected and blank rows from BO.xlsx.
+    ' Approved / Rejected is currently found by header name.
+    '========================================================
+
+    wbBO.Activate
+    LastRowBO = GetLastUsedRow(wsBO)
+    ApprovedRejectedCol = FindHeaderColumn(wsBO, "Approved / Rejected", 1)
+
+    If ApprovedRejectedCol = 0 Then
+        Err.Raise vbObjectError + 105, "Automatic_BO", _
+            "Could not find Approved / Rejected after arranging BO columns."
+    End If
+
+    If wsBO.AutoFilterMode Then
+        On Error Resume Next
+        wsBO.ShowAllData
+        On Error GoTo CleanFail
+        wsBO.AutoFilterMode = False
+    End If
+
+    wsBO.Range(wsBO.Cells(1, 1), wsBO.Cells(LastRowBO, 8)).AutoFilter _
+        Field:=ApprovedRejectedCol, Criteria1:="=Rejected", Operator:=xlOr, Criteria2:="="
+
+    Set VisibleRows = Nothing
+    On Error Resume Next
+    Set VisibleRows = wsBO.Range(wsBO.Cells(2, 1), _
+        wsBO.Cells(LastRowBO, 8)).SpecialCells(xlCellTypeVisible)
+    On Error GoTo CleanFail
+
+    If Not VisibleRows Is Nothing Then VisibleRows.EntireRow.Delete
+
+    If wsBO.AutoFilterMode Then
+        On Error Resume Next
+        wsBO.ShowAllData
+        On Error GoTo CleanFail
+        wsBO.AutoFilterMode = False
+    End If
+
+    LastRowBO = GetLastUsedRow(wsBO)
+
+    '========================================================
+    ' STEP 4 - Reorder columns by HEADER NAME for workflow.
+    '
+    ' Final layout:
+    ' A Type
+    ' B Rim Name
+    ' C Status (cleared for VLOOKUP)
+    ' D Acct No
+    ' E Branch
+    ' F Rim No
+    ' G Approved / Rejected
+    ' H Product Name
+    '========================================================
+
+    FinalHeaders = Array( _
+        "Type", "Rim Name", "Status", "Acct No", _
+        "Branch", "Rim No", "Approved / Rejected", "Product Name")
+
+    TempSheetName = "__BO_TempLayout"
+    If SheetExists(wbBO, TempSheetName) Then
+        wbBO.Worksheets(TempSheetName).Delete
+    End If
+
+    Set TempSheet = wbBO.Worksheets.Add(After:=wbBO.Worksheets(wbBO.Worksheets.Count))
+    TempSheet.Name = TempSheetName
+
+    For i = LBound(FinalHeaders) To UBound(FinalHeaders)
+        SourceCol = FindHeaderColumn(wsBO, CStr(FinalHeaders(i)), 1)
+
+        If SourceCol = 0 Then
+            Err.Raise vbObjectError + 106, "Automatic_BO", _
+                "Required header not found for final layout: " & CStr(FinalHeaders(i))
+        End If
+
+        wsBO.Range(wsBO.Cells(1, SourceCol), wsBO.Cells(LastRowBO, SourceCol)).Copy _
+            Destination:=TempSheet.Cells(1, i + 1)
+
+        TempSheet.Columns(i + 1).ColumnWidth = wsBO.Columns(SourceCol).ColumnWidth
+    Next i
+
+    wsBO.Cells.Clear
+    TempSheet.Range("A1:H" & LastRowBO).Copy Destination:=wsBO.Range("A1")
+
+    For i = 1 To 8
+        wsBO.Columns(i).ColumnWidth = TempSheet.Columns(i).ColumnWidth
+    Next i
+
+    TempSheet.Delete
+    Set TempSheet = Nothing
+    Application.CutCopyMode = False
+
+    If LastRowBO >= 2 Then wsBO.Range("C2:C" & LastRowBO).ClearContents
+
+    ' Remove old output sheets before copying filtered ranges.
+    ' This avoids disrupting Excel's copy buffer during the rebuild.
+    If SheetExists(wbBO, "LME") Then wbBO.Worksheets("LME").Delete
+    If SheetExists(wbBO, "CAR") Then wbBO.Worksheets("CAR").Delete
+
+    '========================================================
+    ' STEP 5 - Filter LME products and copy to LME sheet.
+    '========================================================
+
+    LastRowBO = GetLastUsedRow(wsBO)
+    TypeCol = FindHeaderColumn(wsBO, "Type", 1)
+
+    wsBO.Range("A1:H" & LastRowBO).AutoFilter _
+        Field:=TypeCol, _
+        Criteria1:=Array("LME", "LSG", "LSC", "LUG", "LSH", "LSE", "IMF", "LBU"), _
+        Operator:=xlFilterValues
+
+    wsBO.Range("A1:H" & LastRowBO).SpecialCells(xlCellTypeVisible).Copy
+
+    Set wsLME = wbBO.Worksheets.Add(After:=wbBO.Worksheets(wbBO.Worksheets.Count))
+    wsLME.Name = "LME"
+    wsLME.Range("A1").PasteSpecial Paste:=xlPasteAll
+    Application.CutCopyMode = False
+    wsLME.Cells.EntireColumn.AutoFit
+
+    '========================================================
+    ' STEP 6 - Filter CAR products and copy to CAR sheet.
+    '========================================================
+
+    If wsBO.AutoFilterMode Then
+        On Error Resume Next
+        wsBO.ShowAllData
+        On Error GoTo CleanFail
+        wsBO.AutoFilterMode = False
+    End If
+
+    LastRowBO = GetLastUsedRow(wsBO)
+
+    wsBO.Range("A1:H" & LastRowBO).AutoFilter _
+        Field:=TypeCol, _
+        Criteria1:=Array("MCF", "UMC", "MGS", "MGF", "MKF", "JMB", "BIK", "MAG"), _
+        Operator:=xlFilterValues
+
+    wsBO.Range("A1:H" & LastRowBO).SpecialCells(xlCellTypeVisible).Copy
+
+    Set wsCAR = wbBO.Worksheets.Add(After:=wbBO.Worksheets(wbBO.Worksheets.Count))
+    wsCAR.Name = "CAR"
+    wsCAR.Range("A1").PasteSpecial Paste:=xlPasteAll
+    Application.CutCopyMode = False
+    wsCAR.Cells.EntireColumn.AutoFit
+
+    If wsBO.AutoFilterMode Then
+        On Error Resume Next
+        wsBO.ShowAllData
+        On Error GoTo CleanFail
+        wsBO.AutoFilterMode = False
+    End If
+
+    '========================================================
+    ' STEP 7 - VLOOKUP in CAR (serial only).
+    ' Product Name stays in column H and moves with each row.
+    '========================================================
+
+    With wsCAR
+        LastRowCAR = .Cells(.Rows.Count, "D").End(xlUp).Row
+
+        If LastRowCAR >= 2 Then
+            .Range("C:C").NumberFormat = "General"
+            .Range("C2").Formula = _
+                "=VLOOKUP(D2,'[BO . Coding.xlsx]Car'!$A:$B,2,0)"
+
+            .Range("C2").AutoFill Destination:=.Range("C2:C" & LastRowCAR)
+            Application.CalculateFull
+
+            .Range("C2:C" & LastRowCAR).Copy
+            .Range("C2:C" & LastRowCAR).PasteSpecial Paste:=xlPasteValues
+            Application.CutCopyMode = False
+            Application.DataEntryMode = False
+        End If
+
+        If LastRowCAR >= 2 Then
+            With .Sort
+                .SortFields.Clear
+                .SortFields.Add2 Key:=wsCAR.Range("C2:C" & LastRowCAR), _
+                    SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:=xlSortNormal
+                .SetRange wsCAR.Range("A2:H" & LastRowCAR)
+                .Header = xlNo
+                .MatchCase = False
+                .Orientation = xlTopToBottom
+                .SortMethod = xlPinYin
+                .Apply
+            End With
+        End If
+    End With
+
+    '========================================================
+    ' STEP 8 - VLOOKUP in LME (serial only).
+    '========================================================
+
+    With wsLME
+        LastRowLME = .Cells(.Rows.Count, "D").End(xlUp).Row
+
+        If LastRowLME >= 2 Then
+            .Range("C:C").NumberFormat = "General"
+            .Range("C2").Formula = _
+                "=VLOOKUP(D2,'[BO . Coding.xlsx]LME'!$A:$B,2,0)"
+
+            .Range("C2").AutoFill Destination:=.Range("C2:C" & LastRowLME)
+            Application.CalculateFull
+
+            .Range("C2:C" & LastRowLME).Copy
+            .Range("C2:C" & LastRowLME).PasteSpecial Paste:=xlPasteValues
+            Application.CutCopyMode = False
+            Application.DataEntryMode = False
+        End If
+
+        If LastRowLME >= 2 Then
+            With .Sort
+                .SortFields.Clear
+                .SortFields.Add2 Key:=wsLME.Range("C2:C" & LastRowLME), _
+                    SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:=xlSortNormal
+                .SetRange wsLME.Range("A2:H" & LastRowLME)
+                .Header = xlNo
+                .MatchCase = False
+                .Orientation = xlTopToBottom
+                .SortMethod = xlPinYin
+                .Apply
+            End With
+        End If
+    End With
+
+    wbBO.Save
+    wbReport.Save
+
+
+CleanExit:
+    On Error Resume Next
+    If Not TempSheet Is Nothing Then TempSheet.Delete
+    Application.CutCopyMode = False
+    Application.ScreenUpdating = PreviousScreenUpdating
+    Application.DisplayAlerts = PreviousDisplayAlerts
+    Application.EnableEvents = PreviousEnableEvents
+    On Error GoTo 0
+    Exit Sub
+
+CleanFail:
+    Dim ErrorMessage As String
+    ErrorMessage = "Automatic_BO stopped: " & Err.Description
+
+    On Error Resume Next
+    If Not TempSheet Is Nothing Then TempSheet.Delete
+    Application.CutCopyMode = False
+    Application.ScreenUpdating = PreviousScreenUpdating
+    Application.DisplayAlerts = PreviousDisplayAlerts
+    Application.EnableEvents = PreviousEnableEvents
+    On Error GoTo 0
+
+    MsgBox ErrorMessage, vbCritical
+End Sub
+
+
+'============================================================
+' HELPER: Find a column by its header text.
+' Header matching ignores spaces, slashes, hyphens and case.
+'============================================================
+Private Function FindHeaderColumn(ByVal ws As Worksheet, _
+                                  ByVal HeaderText As String, _
+                                  Optional ByVal HeaderRow As Long = 1) As Long
+    Dim LastCol As Long
+    Dim c As Long
+    Dim Wanted As String
+
+    Wanted = NormalizeHeader(HeaderText)
+    LastCol = ws.Cells(HeaderRow, ws.Columns.Count).End(xlToLeft).Column
+
+    For c = 1 To LastCol
+        If NormalizeHeader(CStr(ws.Cells(HeaderRow, c).Value)) = Wanted Then
+            FindHeaderColumn = c
+            Exit Function
+        End If
+    Next c
+End Function
+
+
+'============================================================
+' HELPER: Find a column matching any of several header aliases.
+'============================================================
+Private Function FindHeaderColumnAny(ByVal ws As Worksheet, _
+                                     ByVal HeaderRow As Long, _
+                                     ByVal Aliases As Variant) As Long
+    Dim i As Long
+    Dim FoundCol As Long
+
+    For i = LBound(Aliases) To UBound(Aliases)
+        FoundCol = FindHeaderColumn(ws, CStr(Aliases(i)), HeaderRow)
+        If FoundCol > 0 Then
+            FindHeaderColumnAny = FoundCol
+            Exit Function
+        End If
+    Next i
+End Function
+
+
+'============================================================
+' HELPER: Normalize a header for reliable matching.
+'============================================================
+Private Function NormalizeHeader(ByVal TextValue As String) As String
+    Dim s As String
+
+    s = LCase$(Trim$(TextValue))
+    s = Replace(s, " ", "")
+    s = Replace(s, vbCr, "")
+    s = Replace(s, vbLf, "")
+    s = Replace(s, "/", "")
+    s = Replace(s, "\", "")
+    s = Replace(s, "-", "")
+    s = Replace(s, "_", "")
+    s = Replace(s, ".", "")
+    NormalizeHeader = s
+End Function
+
+
+'============================================================
+' HELPER: Last row containing data anywhere on the worksheet.
+'============================================================
+Private Function GetLastUsedRow(ByVal ws As Worksheet) As Long
+    Dim LastCell As Range
+
+    Set LastCell = ws.Cells.Find(What:="*", _
+                                 After:=ws.Cells(1, 1), _
+                                 LookIn:=xlFormulas, _
+                                 LookAt:=xlPart, _
+                                 SearchOrder:=xlByRows, _
+                                 SearchDirection:=xlPrevious, _
+                                 MatchCase:=False)
+
+    If LastCell Is Nothing Then
+        GetLastUsedRow = 1
+    Else
+        GetLastUsedRow = LastCell.Row
+    End If
+End Function
+
+
+'============================================================
+' HELPER: Test whether a worksheet exists.
+'============================================================
+Private Function SheetExists(ByVal wb As Workbook, _
+                             ByVal SheetName As String) As Boolean
+    Dim ws As Worksheet
+
+    On Error Resume Next
+    Set ws = wb.Worksheets(SheetName)
+    On Error GoTo 0
+
+    SheetExists = Not ws Is Nothing
+
+End Function
+
+
+Sub Forma_Print()
+
+    Dim wbBO As Workbook
+    Dim wsTemplate As Worksheet
+    Dim wsPrint As Worksheet
+    Dim wsLME As Worksheet
+    Dim wsCAR As Worksheet
+    
+    Dim LastRowLME As Long
+    Dim LastRowCAR As Long
+    Dim i As Long
+
+
+    '========================================================
+    ' WORKBOOKS / SHEETS
+    '========================================================
+
+    Set wbBO = Workbooks("BO.xlsx")
+    Set wsTemplate = ThisWorkbook.Worksheets("BO Settled")
+    
+    Set wsLME = wbBO.Worksheets("LME")
+    Set wsCAR = wbBO.Worksheets("CAR")
+
+
+    '========================================================
+    ' STEP 1 - Set today's date in the template
+    '========================================================
+
+    wsTemplate.Range("A1").Value = Date
+    wsTemplate.Range("A1").NumberFormat = "d/m/yyyy"
+
+
+    '========================================================
+    ' STEP 2 - Copy BO Settled template to BO.xlsx
+    '========================================================
+
+    wsTemplate.Copy After:=wbBO.Sheets(3)
+    
+    Set wsPrint = wbBO.ActiveSheet
+
+
+    '========================================================
+    ' STEP 3 - Find actual last row in LME
+    '========================================================
+
+    LastRowLME = wsLME.Cells(wsLME.Rows.Count, "B").End(xlUp).Row
+
+
+    '========================================================
+    ' STEP 4 - Copy LME Name + Status
+    ' B:C  --->  I:J
+    '========================================================
+
+    If LastRowLME >= 2 Then
+
+        wsLME.Range("B2:C" & LastRowLME).Copy
+
+        wsPrint.Range("I2").PasteSpecial _
+            Paste:=xlPasteAllUsingSourceTheme, _
+            Operation:=xlNone, _
+            SkipBlanks:=False, _
+            Transpose:=False
+
+        wsPrint.Range("I2").PasteSpecial _
+            Paste:=xlPasteValues, _
+            Operation:=xlNone, _
+            SkipBlanks:=False, _
+            Transpose:=False
+
+    End If
+
+
+    '========================================================
+    ' STEP 5 - Copy LME Branch + Rim No
+    ' E:F  --->  K:L
+    '========================================================
+
+    If LastRowLME >= 2 Then
+
+        wsLME.Range("E2:F" & LastRowLME).Copy
+
+        wsPrint.Range("K2").PasteSpecial _
+            Paste:=xlPasteAllUsingSourceTheme, _
+            Operation:=xlNone, _
+            SkipBlanks:=False, _
+            Transpose:=False
+
+        wsPrint.Range("K2").PasteSpecial _
+            Paste:=xlPasteValues, _
+            Operation:=xlNone, _
+            SkipBlanks:=False, _
+            Transpose:=False
+
+    End If
+
+
+    '========================================================
+    ' STEP 6 - Clean LME Branch Names
+    ' K = Branch
+    '========================================================
+
+    If LastRowLME >= 2 Then
+
+        For i = 2 To LastRowLME
+
+            If Len(Trim(wsPrint.Cells(i, "K").Value)) > 0 Then
+
+                wsPrint.Cells(i, "K").Value = _
+                    CleanBranch(wsPrint.Cells(i, "K").Value)
+
+            End If
+
+        Next i
+
+    End If
+
+
+    '========================================================
+    ' STEP 7 - Generate LME numbering dynamically
+    ' H = #
+    '========================================================
+
+    If LastRowLME >= 2 Then
+
+        wsPrint.Range("H2:H" & LastRowLME).Value = _
+            wsPrint.Evaluate("ROW(1:" & LastRowLME - 1 & ")")
+
+    End If
+
+
+    '========================================================
+    ' STEP 8 - Format LME area
+    '========================================================
+    
+    If LastRowLME >= 2 Then
+    
+        With wsPrint.Range("H2:L" & LastRowLME)
+    
+            With .Font
+                .Name = "Arial"
+                .Size = 18
+                .Bold = True
+                .Strikethrough = False
+                .Superscript = False
+                .Subscript = False
+                .OutlineFont = False
+                .Shadow = False
+                .Underline = xlUnderlineStyleNone
+                .Color = -16777216
+                .TintAndShade = 0
+                .ThemeFont = xlThemeFontNone
+            End With
+    
+            With .Borders
+                .LineStyle = xlContinuous
+                .Weight = xlThin
+            End With
+    
+        End With
+    
+    End If
+
+
+    '========================================================
+    ' STEP 9 - Find actual last row in CAR
+    '========================================================
+
+    LastRowCAR = wsCAR.Cells(wsCAR.Rows.Count, "B").End(xlUp).Row
+
+
+    '========================================================
+    ' STEP 10 - Copy CAR Name + Status
+    ' B:C  --->  C:D
+    '========================================================
+
+    If LastRowCAR >= 2 Then
+
+        wsCAR.Range("B2:C" & LastRowCAR).Copy
+
+        wsPrint.Range("C2").PasteSpecial _
+            Paste:=xlPasteAllUsingSourceTheme, _
+            Operation:=xlNone, _
+            SkipBlanks:=False, _
+            Transpose:=False
+
+        wsPrint.Range("C2").PasteSpecial _
+            Paste:=xlPasteValues, _
+            Operation:=xlNone, _
+            SkipBlanks:=False, _
+            Transpose:=False
+
+    End If
+
+
+    '========================================================
+    ' STEP 11 - Copy CAR Branch + Rim No
+    ' E:F  --->  E:F
+    '========================================================
+
+    If LastRowCAR >= 2 Then
+
+        wsCAR.Range("E2:F" & LastRowCAR).Copy
+
+        wsPrint.Range("E2").PasteSpecial _
+            Paste:=xlPasteAllUsingSourceTheme, _
+            Operation:=xlNone, _
+            SkipBlanks:=False, _
+            Transpose:=False
+
+        wsPrint.Range("E2").PasteSpecial _
+            Paste:=xlPasteValues, _
+            Operation:=xlNone, _
+            SkipBlanks:=False, _
+            Transpose:=False
+
+    End If
+
+
+    '========================================================
+    ' STEP 12 - Clean CAR Branch Names
+    ' E = Branch
+    '========================================================
+
+    If LastRowCAR >= 2 Then
+
+        For i = 2 To LastRowCAR
+
+            If Len(Trim(wsPrint.Cells(i, "E").Value)) > 0 Then
+
+                wsPrint.Cells(i, "E").Value = _
+                    CleanBranch(wsPrint.Cells(i, "E").Value)
+
+            End If
+
+        Next i
+
+    End If
+
+
+    '========================================================
+    ' STEP 13 - Generate CAR numbering dynamically
+    ' B = #
+    '========================================================
+
+    If LastRowCAR >= 2 Then
+
+        wsPrint.Range("B2:B" & LastRowCAR).Value = _
+            wsPrint.Evaluate("ROW(1:" & LastRowCAR - 1 & ")")
+
+    End If
+
+
+    '========================================================
+    ' STEP 14 - Format CAR area
+    '========================================================
+    
+    If LastRowCAR >= 2 Then
+    
+        With wsPrint.Range("B2:F" & LastRowCAR)
+    
+            With .Font
+                .Name = "Arial"
+                .Size = 18
+                .Bold = True
+                .Strikethrough = False
+                .Superscript = False
+                .Subscript = False
+                .OutlineFont = False
+                .Shadow = False
+                .Underline = xlUnderlineStyleNone
+                .Color = -16777216
+                .TintAndShade = 0
+                .ThemeFont = xlThemeFontNone
+            End With
+    
+            With .Borders
+                .LineStyle = xlContinuous
+                .Weight = xlThin
+            End With
+    
+        End With
+    
+    End If
+    
+    
+    '========================================================
+    ' STEP 15 - CLEAN BRANCHES + AUTOFIT + FINISH
+    '========================================================
+    
+    CleanBranchesAndFinish wsPrint, LastRowCAR, LastRowLME
+
+End Sub

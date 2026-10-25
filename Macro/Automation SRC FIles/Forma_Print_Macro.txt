@@ -1,0 +1,196 @@
+'============================================================
+' CLEAN BRANCHES + AUTOFIT + FINISH
+'============================================================
+
+Private Sub CleanBranchesAndFinish( _
+    ByVal wsPrint As Worksheet, _
+    ByVal LastRowCAR As Long, _
+    ByVal LastRowLME As Long)
+
+    Dim i As Long
+
+
+    '========================================================
+    ' CLEAN CAR BRANCHES
+    ' CAR Branch = Column F
+    '========================================================
+
+    If LastRowCAR >= 2 Then
+
+        For i = 2 To LastRowCAR
+
+            If Len(Trim(wsPrint.Cells(i, "F").Value)) > 0 Then
+
+                wsPrint.Cells(i, "F").Value = _
+                    CleanBranch(wsPrint.Cells(i, "F").Value)
+
+            End If
+
+        Next i
+
+    End If
+
+
+    '========================================================
+    ' CLEAN LME BRANCHES
+    ' LME Branch = Column K
+    '========================================================
+
+    If LastRowLME >= 2 Then
+
+        For i = 2 To LastRowLME
+
+            If Len(Trim(wsPrint.Cells(i, "K").Value)) > 0 Then
+
+                wsPrint.Cells(i, "K").Value = _
+                    CleanBranch(wsPrint.Cells(i, "K").Value)
+
+            End If
+
+        Next i
+
+    End If
+
+
+    '========================================================
+    ' AutoFit AFTER cleaning all branch names
+    '========================================================
+
+    wsPrint.Cells.EntireColumn.AutoFit
+
+
+    '========================================================
+    ' Clear clipboard
+    '========================================================
+
+    Application.CutCopyMode = False
+
+
+    '========================================================
+    ' FINISH
+    '========================================================
+
+    ThisWorkbook.Activate
+    ThisWorkbook.Worksheets("Sheet1").Select
+    ThisWorkbook.Worksheets("Sheet1").Range("A1").Select
+
+End Sub
+
+
+'============================================================
+' CLEAN BRANCH FUNCTION
+'============================================================
+
+Private Function CleanBranch(ByVal BranchName As String) As String
+
+    Dim Branch As String
+
+    '--------------------------------------------------------
+    ' Remove spaces before and after the branch name
+    '--------------------------------------------------------
+
+    Branch = Trim(BranchName)
+
+
+    '--------------------------------------------------------
+    ' Branch mapping
+    '--------------------------------------------------------
+
+    Select Case Branch
+
+        Case "Sodic Strip Mall Branch"
+            CleanBranch = "Sodic"
+
+        Case "Emad ElDin Branch"
+            CleanBranch = "Emad ElDin"
+
+        Case "Cairo Festival City"
+            CleanBranch = "Cairo Festival"
+
+        Case "Lebanon Street"
+            CleanBranch = "Lebanon"
+
+        Case "Heliopolis Al andalous"
+            CleanBranch = "Al andalous"
+
+        Case "Heliopolis Meriland"
+            CleanBranch = "Meriland"
+
+        Case "New Maadi - Road 9"
+            CleanBranch = "Maadi - Road 9"
+
+        Case "Korba Branch"
+            CleanBranch = "Korba"
+
+        Case "ElObour City Branch"
+            CleanBranch = "ElObour"
+
+        Case "kafr El Sheikh Elgaish street"
+            CleanBranch = "kafr El Sheikh"
+
+        Case "Zagazig Elgalaa street"
+            CleanBranch = "Zagazig Elgalaa"
+
+        Case "Tanta Elgaish street"
+            CleanBranch = "Tanta Elgaish"
+
+        Case "ElRehab Branch"
+            CleanBranch = "ElRehab"
+
+        Case "ElThawra str Branch"
+            CleanBranch = "ElThawra"
+
+        Case "Sohag Nile branch"
+            CleanBranch = "Sohag Nile"
+
+        Case "Sheraton Branch"
+            CleanBranch = "Sheraton"
+
+        Case "Hurghada Branch"
+            CleanBranch = "Hurghada"
+
+        Case "Madinaty Branch"
+            CleanBranch = "Madinaty"
+
+        Case "New Cairo Branch"
+            CleanBranch = "New Cairo"
+
+        Case "El Shams Branch"
+            CleanBranch = "El Shams"
+
+        Case "Arabella Branch"
+            CleanBranch = "Arabella"
+
+        Case "Salah Salem Branch"
+            CleanBranch = "Salah Salem"
+
+        Case "Assiut Gomhouria Street"
+            CleanBranch = "Assiut Gomhouria"
+
+        Case "Minia - korrniash bransh"
+            CleanBranch = "Minia - korrniash"
+
+        Case "Shoubra Branch"
+            CleanBranch = "Shoubra"
+
+        Case "Sohag"
+            CleanBranch = "Sohag"
+            
+        Case "Assiut Saed Zakhlol street"
+            CleanBranch = "Assiut Saed Zakhlol"
+            
+        Case "Hassan El Maamoun Branch"
+            CleanBranch = "Hassan El Maamoun"
+
+        '----------------------------------------------------
+        ' Unknown branch:
+        ' Keep the original name but remove spaces
+        ' before and after it.
+        '----------------------------------------------------
+
+        Case Else
+            CleanBranch = Trim(Branch)
+
+    End Select
+
+End Function

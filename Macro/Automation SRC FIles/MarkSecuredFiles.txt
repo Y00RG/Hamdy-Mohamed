@@ -1,0 +1,58 @@
+Sub MarkSecuredFiles()
+
+    Dim wbBO As Workbook
+    Dim wsLME As Worksheet
+    Dim wsCAR As Worksheet
+    Dim LastRowLME As Long
+    Dim LastRowCAR As Long
+    Dim i As Long
+    Dim ProductName As String
+    Dim c As Range
+    Dim Secured As Boolean
+
+    Set wbBO = Workbooks("BO.xlsx")
+    Set wsLME = wbBO.Worksheets("LME")
+    Set wsCAR = wbBO.Worksheets("CAR")
+
+    LastRowLME = wsLME.Cells(wsLME.Rows.Count, "D").End(xlUp).Row
+
+    For i = 2 To LastRowLME
+        ProductName = Trim$(CStr(wsLME.Cells(i, "H").Value))
+        Secured = (InStr(1, ProductName, "Fully", vbTextCompare) > 0) _
+               Or (InStr(1, ProductName, "Gold", vbTextCompare) > 0) _
+               Or (InStr(1, ProductName, "both", vbTextCompare) > 0)
+
+        If Secured Then
+            wsLME.Range("A" & i & ":H" & i).Interior.Color = RGB(128, 128, 128)
+        Else
+            For Each c In wsLME.Range("A" & i & ":H" & i).Cells
+                If c.Interior.Color = RGB(128, 128, 128) Then
+                    c.Interior.Pattern = xlNone
+                End If
+            Next c
+        End If
+    Next i
+
+    LastRowCAR = wsCAR.Cells(wsCAR.Rows.Count, "D").End(xlUp).Row
+
+    For i = 2 To LastRowCAR
+        ProductName = Trim$(CStr(wsCAR.Cells(i, "H").Value))
+        Secured = (InStr(1, ProductName, "Fully", vbTextCompare) > 0) _
+               Or (InStr(1, ProductName, "Gold", vbTextCompare) > 0) _
+               Or (InStr(1, ProductName, "both", vbTextCompare) > 0)
+
+        If Secured Then
+            wsCAR.Range("A" & i & ":H" & i).Interior.Color = RGB(128, 128, 128)
+        Else
+            For Each c In wsCAR.Range("A" & i & ":H" & i).Cells
+                If c.Interior.Color = RGB(128, 128, 128) Then
+                    c.Interior.Pattern = xlNone
+                End If
+            Next c
+        End If
+    Next i
+
+    Application.CutCopyMode = False
+    wbBO.Activate
+
+End Sub
